@@ -9,6 +9,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import re
 
 backend = default_backend()
 iterations = 100_000
@@ -259,3 +260,26 @@ def isValidPixel(pixel):
 def calculatePreHeader(password):
     preHeader = sha256Iterations(password, 5000)
     return preHeader[-2:] + preHeader[:4]
+
+
+def processCardText(text):
+    images = re.findall("<img src=\"([^\"]+)\">", text)
+    sounds = re.findall("\[sound:([^\]]+)\]", text)
+    groups = re.findall("([^\[^\<]+)*(<img src=\"([^\"]+)\">)*(\[sound:([^\]]+)\])*", text)
+    texts = []
+    ignore = 0
+    for f in groups:
+        for t in f:
+            if t != '':
+                if ignore:
+                    ignore = False
+                else:
+                    if t.startswith("<img"):
+                        ignore = True
+                    elif t.startswith("[sound"):
+                        ignore = True
+                    else:
+                        texts.append(t)
+
+    fields = { "texts" : texts, "images" : images, "sounds": sounds }
+    return fields

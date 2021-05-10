@@ -6,83 +6,16 @@ import traceback
 
 MAX_WIDTH = 3840
 MAX_HEIGHT = 2160
+PRE_HEADER_SIZE = 3 #bytes
 HEADER_SIZE = 3 #bytes
+COLOR_SIZE = 3
 
-def encodeSeq(imagePath, text, password, outputFileName):
-    outputFileNameObj = utils.manageOutputFileName(outputFileName)
-    outputFileName = outputFileNameObj["name"]
-    print(outputFileNameObj)
-
-    data = utils.stringToHex(text)
-    data = utils.ofuscate(data)
-    try:
-        with Image.open(imagePath) as img:
-            width, height = img.size
-            print(img.size)
-            i = 0
-            dataLength = len(data)
-            if(dataLength < width * height):
-                for x in range(0, width):
-                    for y in range(0, height):
-                        if(i < dataLength):
-                            pixel = list(img.getpixel((x, y)))
-                            newPixel = utils.getBestVector(pixel, len(pixel), int(data[i], 16))
-                            #print(int(data[i], 16), " | ", pixel, "->", newPixel)
-                            i += 1
-                            img.putpixel((x, y), tuple(newPixel))
-                img.save(outputFileName, outputFileNameObj["type"])
-            else: 
-                print("Data demasiado largo:", dataLength, "máximo soportado: ", width * height)
-                return False
-    except Exception as e:
-            print(f'\n[-]Exception occured: {e}')
-            return False
-    finally:
-            return True
-
-def encodeRandomSeq(imagePath, text, password, outputFileName):
-    outputFileNameObj = utils.manageOutputFileName(outputFileName)
-    outputFileName = outputFileNameObj["name"]
-    print(outputFileNameObj)
-
-    data = utils.stringToHex(text)
-    data = utils.ofuscate(data)
-    try:
-        with Image.open(imagePath) as img:
-            width, height = img.size
-            print(img.size)
-            i = 0
-            dataLength = len(data)
-            if(dataLength < width * height):
-                positions = utils.randomPositions(width, height, password)
-                for position in positions:
-                    if(i < dataLength):
-                        x = position["x"]
-                        y = position["y"]
-                        pixel = list(img.getpixel((x, y)))
-                        newPixel = utils.getBestVector(pixel, len(pixel), int(data[i], 16))
-                        i += 1
-                        img.putpixel((x, y), tuple(newPixel))
-                    else:
-                        break
-                img.save(outputFileName, outputFileNameObj["type"])
-            else: 
-                print("Data demasiado largo:", dataLength, "máximo soportado: ", width * height)
-                return False
-    except Exception as e:
-            print(f'\n[-]Exception occured: {e}')
-            print(e)
-            traceback.print_exc()
-            return False
-    finally:
-            return True
 # 7E 90 00 -> 3 bytes -> data covered in image
-def encode(imagePath, text, password, outputFileName):
+def encode(imagePath, hexdata, password, outputFileName):
     outputFileNameObj = utils.manageOutputFileName(outputFileName)
     outputFileName = outputFileNameObj["name"]
 
-    data = utils.stringToHex(text)
-    data = utils.ofuscate(data)
+    data = hexdata
     try:
         with Image.open(imagePath) as img:
             width, height = img.size
@@ -93,9 +26,11 @@ def encode(imagePath, text, password, outputFileName):
             else:
                 i = 0
                 dataLength = len(data)
+                preHeader = utils.calculatePreHeader(password)
                 header = f'{dataLength:0>6X}'
                 dataLength += (HEADER_SIZE * 2)
-                data = header + data
+                dataLength += (PRE_HEADER_SIZE * 2)
+                data = preHeader + header + data
                 if(dataLength < width * height):
                     positions = utils.randomPositions(width, height, password)
                     for position in positions:
@@ -104,7 +39,7 @@ def encode(imagePath, text, password, outputFileName):
                             y = position["y"]
                             pixel = list(img.getpixel((x, y)))
                             if utils.isValidPixel(pixel):
-                                newPixel = utils.getBestVector(pixel, len(pixel), int(data[i], 16))
+                                newPixel = utils.getBestVector(pixel, int(data[i], 16))
                                 #print(int(data[i], 16), x, y, pixel, "->", newPixel)
                                 img.putpixel((x, y), tuple(newPixel))
                                 i += 1
@@ -114,7 +49,7 @@ def encode(imagePath, text, password, outputFileName):
                         print("All data could not be written")
                         print("Use estimate function to know about limits of this photo")
                         return False
-                    img.save(outputFileName, outputFileNameObj["type"], dpi=[300,300], quality=90)
+                    img.save(outputFileName, outputFileNameObj["type"])
                 else: 
                     print("Data demasiado largo:", dataLength, "máximo soportado: ", width * height)
                     return False
@@ -129,6 +64,7 @@ def encode(imagePath, text, password, outputFileName):
 def estimate(imagePath):
     global MAX_WIDTH
     global MAX_HEIGHT
+    global HEADER_SIZE
     total = 0
     try:
         with Image.open(imagePath) as img:
@@ -146,11 +82,14 @@ def estimate(imagePath):
             print(f'\n[-]Exception occured: {e}')
 
     if total > 0:
-        total -= HEADER_SIZE
+        total -= (HEADER_SIZE * 2)
+        total -= (PRE_HEADER_SIZE * 2)
     return total
 
 
 def decode(imagePath, password):
+    global HEADER_SIZE
+    global COLOR_SIZE
     try:
         with Image.open(imagePath) as img:
             width, height = img.size
@@ -161,35 +100,52 @@ def decode(imagePath, password):
             else:
                 positions = utils.randomPositions(width, height, password)
                 i = 0
+                preheader = []
                 header = []
                 data = []
-                dataLength = 0
+                dataLength = -1
                 for position in positions:
                     x = position["x"]
                     y = position["y"]
                     pixel = list(img.getpixel((x, y)))
+
+                    preHeaderStart = 0
+                    preHeaderEnd = PRE_HEADER_SIZE*2
+                    headerStart = PRE_HEADER_SIZE*2
+                    headerEnd = (PRE_HEADER_SIZE*2)+(HEADER_SIZE*2)
+
                     if utils.isValidPixel(pixel):
                         #print(x, y, pixel)
-                        if i < (HEADER_SIZE * 2):
-                            value = 0
-                            for c in pixel:
-                                value += c % 10
-                            header.append(f'{value:0>1X}')
-                        if i >= (HEADER_SIZE * 2):
-                            if i == (HEADER_SIZE * 2):
+                        value = 0
+                        for c in range(COLOR_SIZE):
+                            value += pixel[c] % 10
+
+                        if i>=preHeaderStart and i<preHeaderEnd:
+                            #leyendo preheader
+                            preheader.append(f'{value:0>1x}')
+                            if i+1 == preHeaderEnd:
+                                #cerrar preheader
+                                preheader = ''.join(preheader)
+                                calculatedPreHeader = utils.calculatePreHeader(password)
+                                if preheader != calculatedPreHeader:
+                                    print("ERROR: All data could not be read. PREHEADER")
+                                    return False
+                        elif i>=headerStart and i<headerEnd:
+                            #leyendo header
+                            header.append(f'{value:0>1x}')
+                            if i+1 == headerEnd:
+                                #cerrar header
                                 header = ''.join(header)
-                                dataLength = int(header, 16) + len(header)
-                            if dataLength > 0:
-                                value = 0
-                                for c in pixel:
-                                    value += c % 10
-                                data.append(f'{value:0>1X}')
+                                dataLength = int(header, 16) + len(header) + len(preheader)
+
+                        elif i>= headerEnd:
+                            data.append(f'{value:0>1x}')
                         i += 1
                     if i == dataLength:
                         break
                 if(i < dataLength):
                     print("ERROR: All data could not be read.")
-                    return ''.join([])
+                    return False
                 return ''.join(data)
     except Exception as e:
             print(f'\n[-]Exception occured: {e}')

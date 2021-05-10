@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 backend = default_backend()
 iterations = 100_000
+COLOR_SIZE = 3
 
 def _derive_key(password: bytes, salt: bytes, iterations: int = iterations) -> bytes:
     """Derive a secret key from a given password and salt"""
@@ -85,7 +86,7 @@ def manageOutputFileName(outputFileName):
         splited = outputFileName.split(".")
         extension = splited[-1]
         if manageExtension(extension, outputFile):
-            outputFile["name"] = ''.join(splited[:-1])
+            outputFile["name"] = '.'.join(splited[:-1])
         else:
             outputFile["name"] = outputFileName
     else:
@@ -102,6 +103,12 @@ def manageOutputFileName(outputFileName):
 
 def sha256(data):
     return hashlib.sha256(data.encode()).hexdigest()
+
+def sha256Iterations(password, iterations):
+    seed = sha256(password)
+    for i in range(iterations):
+        seed = sha256(password + seed)
+    return seed
 
 def ofuscate(data):
     #print("Ofuscate:", data)
@@ -150,18 +157,24 @@ kDTreeMap = {
 
 from scipy import spatial
 def getVectorFromKdTree(target, vector):
+    global COLOR_SIZE
     kdtree = kDTreeMap[str(target)]
     vectors = getVectorsList(target)    
     if kdtree is None:
         kdtree = spatial.KDTree(vectors)
         kDTreeMap[str(target)] = kdtree
+    
+    tmpVector = []
+    for i in range(COLOR_SIZE):
+        tmpVector.append(vector[i])
 
-    return vectors[kdtree.query(vector)[1]]
+    return vectors[kdtree.query(tmpVector)[1]]
 
-def getBestVector(initVector, size, targetValue):
+def getBestVector(initVector, targetValue):
+    global COLOR_SIZE
     v = getVectorFromKdTree(targetValue, initVector)
     finalVector = initVector.copy()
-    for i in range(size):
+    for i in range(COLOR_SIZE):
         finalVector[i] = finalVector[i] - finalVector[i] % 10 + v[i]
         diffPosition = abs(finalVector[i] - initVector[i])
 
@@ -182,8 +195,8 @@ def getBestVector(initVector, size, targetValue):
         min_pos = 0
         last_max = -1
         last_min = 256
-        for i in range(size):
-            if finalVector[i] > last_max:
+        for i in range(COLOR_SIZE):
+            if finalVector[i] >= last_max:
                 last_max = finalVector[i]
                 max_pos = i
             if finalVector[i] < last_min:
@@ -192,35 +205,16 @@ def getBestVector(initVector, size, targetValue):
 
         action = 1
         while not isValidPixel(finalVector):
-            if finalVector[max_pos] + 5 < 256 and finalVector[min_pos] - 5 > -1:
-                finalVector[max_pos] +=5
-                finalVector[min_pos] -=5
+            lastaction = action
+            if action == 1:
+                if finalVector[max_pos] + 10 < 256:
+                    finalVector[max_pos] +=10
+                action = -1
             else:
-                if action == 1:
-                    if finalVector[max_pos] + 10 < 256:
-                        finalVector[max_pos] +=10
-                    action = -1
-                else:
-                    if finalVector[min_pos] - 10 > -1:
-                        finalVector[min_pos] -=10
-                    action = 1
+                if finalVector[min_pos] - 10 > -1:
+                    finalVector[min_pos] -=10
+                action = 1
     return finalVector
-
-def getBestVectorR(initVector, size, targetValue):
-    initVector = initVector.copy()
-    actualValue = getVectorValue(initVector)
-    while actualValue != targetValue:
-        initVector[randrange(size)] += 1
-        actualValue = getVectorValue(initVector)
-
-    for i in range(size):
-        while initVector[i] > 255:
-            initVector[i] -= 10
-
-        while initVector[i] < 0:
-            initVector[i] += 10
-
-    return initVector
 
 def randomArray(array, password):
     seed = sha256(password)
@@ -245,10 +239,23 @@ def randomPositions(width, height, password):
     
 
 def getSTDev(vector):
-    return statistics.stdev(vector)
+    global COLOR_SIZE
+    tmpVector = []
+    for i in range(COLOR_SIZE):
+        tmpVector.append(vector[i])
+    return statistics.stdev(tmpVector)
 
 def getMean(vector):
-    return numpy.mean(vector)
+    global COLOR_SIZE
+    total = 0
+    for i in range(COLOR_SIZE):
+        total += vector[i]
+    return int(total/COLOR_SIZE)
 
 def isValidPixel(pixel):
-    return getSTDev(pixel) > 10 or getMean(pixel) < 100
+    mean = getMean(pixel)
+    return getSTDev(pixel) > 10 or mean < 100 and mean > 20
+
+def calculatePreHeader(password):
+    preHeader = sha256Iterations(password, 5000)
+    return preHeader[-2:] + preHeader[:4]

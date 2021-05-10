@@ -1,2 +1,0 @@
-# CyberSecurity-APT-Stego
-Prueba

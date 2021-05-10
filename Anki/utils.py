@@ -222,6 +222,15 @@ def getBestVectorR(initVector, size, targetValue):
 
     return initVector
 
+def randomArray(array, password):
+    seed = sha256(password)
+    for i in range(10000):
+        seed = sha256(seed + password)
+    
+    random.seed(seed)
+    random.shuffle(array)
+    return array
+
 def randomPositions(width, height, password):
     pos = { "x": 0, "y": 0}
     positions = []
@@ -231,14 +240,9 @@ def randomPositions(width, height, password):
             pos["x"] = x
             pos["y"] = y
             positions.append(pos.copy())
+
+    return randomArray(positions, password)
     
-    seed = sha256(password)
-    for i in range(10000):
-        seed = sha256(seed + password)
-    
-    random.seed(seed)
-    random.shuffle(positions)
-    return positions
 
 def getSTDev(vector):
     return statistics.stdev(vector)

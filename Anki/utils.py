@@ -10,6 +10,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import re
+import collections
 
 backend = default_backend()
 iterations = 100_000
@@ -46,8 +47,15 @@ def stringToBin(text):
 def stringToHex(text):
     return text.encode('utf-8').hex()
 
+def hexToString(s):
+    return bytes.fromhex(s).decode('utf-8')
+
 def intToBin(x):
     return '{0:b}'.format(x)
+
+def calculateMod8(number):
+    remainder=number%8
+    return remainder
 
 supportedExtensionsMap = {
     "defaultExt" : "png",
@@ -225,6 +233,20 @@ def randomArray(array, password):
     random.seed(seed)
     random.shuffle(array)
     return array
+
+def inverseRandomArray(array,password):
+    mixedSecret = randomArray(array.copy(), password)
+    count=0
+    indices=[]
+    while count!=len(array):
+        indices.append(count)
+        count=count+1
+    mixedIndices = randomArray(indices.copy(), password)
+    originalVector = {}
+    for i in range(len(mixedIndices)):
+        originalVector[mixedIndices[i]] = mixedSecret[i]
+    originalVector = collections.OrderedDict(sorted(originalVector.items()))
+    return list(originalVector.values())
 
 def randomPositions(width, height, password):
     pos = { "x": 0, "y": 0}

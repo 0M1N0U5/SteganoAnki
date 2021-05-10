@@ -1,6 +1,6 @@
 import random
 
-#Script to add pseudorandom positions
+#Script to multiply pseudorandom positions
 #secretOctal="164336700403466254334462564"
 secretOctal="1234561"
 newSecret=""

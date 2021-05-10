@@ -102,3 +102,13 @@ dist
 
 # TernJS port file
 .tern-port
+.DS_Store
+Anki/__pycache__/ankiwrapper.cpython-39.pyc
+.gitignore
+.gitignore
+.gitignore
+secret
+.gitignore
+Anki/__pycache__/UtilesAnki.cpython-39.pyc
+Anki/__pycache__/imageStego.cpython-39.pyc
+Anki/__pycache__/utils.cpython-39.pyc

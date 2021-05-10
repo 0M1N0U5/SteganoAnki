@@ -2,6 +2,7 @@ from ankipandas import Collection
 from ankipandas import AnkiDataFrame
 import ankipandas
 import UtilesAnki
+import pathlib
 
 class AnkiWrapper:
     __instance = None
@@ -60,7 +61,12 @@ class AnkiWrapper:
         self.notes_Raw.at[index, "csum"] = UtilesAnki.Calcular_CSUM(Nueva_Entrada[0])
         return self.Update_notes()
 
-    
+    def Obtener_ruta_media(self, media):
+        ruta_db = ankipandas.paths.db_path_input()
+        Ruta_Partes = list(ruta_db.parts)
+        Ruta_Partes[-1] = 'collection.media'
+        Ruta_Partes.append(media)
+        return pathlib.Path(*Ruta_Partes)
 
     
 

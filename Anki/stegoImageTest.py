@@ -43,7 +43,7 @@ print("Data decodificada:", data)
 
 from datetime import datetime
 print(datetime.now().strftime("%H:%M:%S"))
-hilos=4
+hilos=8
 print("Testing de hilos", hilos)
 print(datetime.now().strftime("%H:%M:%S"))
 stegoImage.drawMask("gonzalo-madrid.jpg", "gonzalo-madrid_mask.png", hilos)

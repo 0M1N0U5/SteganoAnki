@@ -157,43 +157,21 @@ def decode(imagePath, password):
             traceback.print_exc()
             return False
 
-class SimpleBox(object):
-    def __init__(self):
-        self.var = None
-
-    def set(self, value):
-        self.var = value
-
-    def get(self):
-        return self.var
-
-    def getPixel(self, x, y):
-        return self.var[y][x]
-
-    def setPixel(self, x, y, value):
-        self.var[y][x] = value
-   
-
 def drawMask(imagePath, outputFileName, threads=1):
     outputFileNameObj = utils.manageOutputFileName(outputFileName)
     outputFileName = outputFileNameObj["name"]
     try:
         with Image.open(imagePath) as img:
-            def drawMaskWorker(positions, inst):
+            def drawMaskWorker(positions, imgArray):
                 for position in positions:
                     x = position["x"]
                     y = position["y"]
-                    pixel = list(inst.getPixel(x, y))
+                    pixel = list(imgArray[y][x])
                     if utils.isValidPixel(pixel):
                         pixel = list([0, 255, 0])
-                        inst.setPixel(x, y, pixel)
+                        imgArray[y][x] = pixel
 
             imgArray = np.asarray(img).copy()
-            BaseManager.register('SimpleBox', SimpleBox)
-            manager = BaseManager()
-            manager.start()
-            inst = manager.SimpleBox()
-            inst.set(imgArray)
             width, height = img.size
             if width > MAX_WIDTH or height > MAX_HEIGHT:
                 print(imagePath, "is", width, "x", height)
@@ -203,16 +181,14 @@ def drawMask(imagePath, outputFileName, threads=1):
                 positions = utils.randomPositions(width, height)
                 threadsPositions = utils.chunkIt(positions, threads)
                 workers = []
-                
                 for l in threadsPositions:
-                    t = Process(target=drawMaskWorker, args=(l,inst))
-                    #t = threading.Thread(target=drawMaskWorker, args=(l,imgArray))
+                    t = threading.Thread(target=drawMaskWorker, args=(l,imgArray))
                     workers.append(t)
                     t.start()
                 for t in workers:
                     t.join()
                 
-                newImg = Image.fromarray(inst.get())
+                newImg = Image.fromarray(imgArray)
                 newImg.save(outputFileName, outputFileNameObj["type"])
                 return True
     except Exception as e:

@@ -15,6 +15,8 @@ import collections
 backend = default_backend()
 iterations = 100_000
 COLOR_SIZE = 3
+MIN_STD = 14
+MAX_STD = 100
 
 def _derive_key(password: bytes, salt: bytes, iterations: int = iterations) -> bytes:
     """Derive a secret key from a given password and salt"""
@@ -200,6 +202,7 @@ def getVectorFromKdTree(target, vector):
 
 def getBestVector(initVector, targetValue):
     global COLOR_SIZE
+    global MAX_STD
     v = getVectorFromKdTree(targetValue, initVector)
     finalVector = initVector.copy()
     for i in range(COLOR_SIZE):
@@ -234,20 +237,28 @@ def getBestVector(initVector, targetValue):
         action = 1
         printe = False
         prints = 0
-        #if not isValidPixel(finalVector):
-        #    print("Sigue sin ser valido")
-        #    printe = True
         fails = 0
         while not isValidPixel(finalVector):
             fails += 1
             lastaction = action
+            std = getSTDev(finalVector)
+            #Los separamos
+            maxOperator = 10
+            minOperator = -10
+            if(std > MAX_STD):
+                #Los juntamos
+                maxOperator = -10
+                minOperator = 10
+            
             if action == 1:
-                if finalVector[max_pos] + 10 < 256:
-                    finalVector[max_pos] +=10
+                newMaxValue = finalVector[max_pos] + maxOperator
+                if newMaxValue > -1 and newMaxValue < 256:
+                    finalVector[max_pos] = newMaxValue
                 action = -1
             else:
-                if finalVector[min_pos] - 10 > -1:
-                    finalVector[min_pos] -=10
+                newMinValue = finalVector[min_pos] + minOperator
+                if newMinValue > -1 and newMinValue < 256:
+                    finalVector[min_pos] = newMinValue
                 action = 1
             if fails >= 100:
                 print("Bloqueo con pixel", initVector, "->", finalVector)
@@ -299,29 +310,16 @@ def randomPositions(rows, columns, password=None):
     
 
 def getSTDev(vector):
-    global COLOR_SIZE
-    tmpVector = []
-    for i in range(COLOR_SIZE):
-        tmpVector.append(int(vector[i]))
+    tmpVector = list(map(int, vector[0:COLOR_SIZE]))
     return statistics.stdev(tmpVector)
 
-def getMean(vector):
-    global COLOR_SIZE
-    total = 0
-    for i in range(COLOR_SIZE):
-        total += vector[i]
-    return int(total/COLOR_SIZE)
 def isValidPixel(vector):
-    global COLOR_SIZE
-    tmpVector = list(map(int, vector[0:3]))
-    std = statistics.stdev(tmpVector)
-    result = std > 14 and std < 100
-    #print("vector", vector, "tmpVector", tmpVector, result, "mean", mean, "std", std)
+    global MIN_STD
+    global MAX_STD
+    std = getSTDev(vector)
+    result = std > MIN_STD and std < MAX_STD
+    #print("vector", vector, "tmpVector", tmpVector, result, "std", std)
     return result
-
-def isValidPixelLight(vector):
-    tmpVector = vector[0:3]
-    return 
 
 def calculatePreHeader(password):
     preHeader = sha256Iterations(password, 5000)

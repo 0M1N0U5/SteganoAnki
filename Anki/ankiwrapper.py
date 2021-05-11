@@ -23,6 +23,7 @@ class AnkiWrapper:
             self.notes = self.col.notes
             self.cards_Raw = ankipandas.raw.get_table(self.col.db, "cards")
             self.notes_Raw = ankipandas.raw.get_table(self.col.db, "notes")
+            self.ruta_base = self.Obtener_ruta_base()
     
     def __del__(self):
         self.col.db.close()
@@ -55,18 +56,31 @@ class AnkiWrapper:
         return self.Update_cards()
     
     def Update_row_notes(self, index, Nueva_Entrada):
-        NuevaRespuesta_Cadena = UtilesAnki.Codificar_flds(Nueva_Entrada)
+        if isinstance(Nueva_Entrada, str):
+            NuevaRespuesta_Lista = UtilesAnki.Decodificar_flds(Nueva_Entrada)
+            NuevaRespuesta_Cadena = Nueva_Entrada
+        else:
+            NuevaRespuesta_Cadena = UtilesAnki.Codificar_flds(Nueva_Entrada)
+            NuevaRespuesta_Lista = Nueva_Entrada
         self.notes_Raw.at[index,"flds"] = NuevaRespuesta_Cadena
-        self.notes_Raw.at[index, "sfld"] = Nueva_Entrada[0]
-        self.notes_Raw.at[index, "csum"] = UtilesAnki.Calcular_CSUM(Nueva_Entrada[0])
+        self.notes_Raw.at[index, "sfld"] = NuevaRespuesta_Lista[0]
+        self.notes_Raw.at[index, "csum"] = UtilesAnki.Calcular_CSUM(NuevaRespuesta_Lista[0])
         return self.Update_notes()
 
-    def Obtener_ruta_media(self, media):
+    def Obtener_ruta_media(self, media):#BORRAR
         ruta_db = ankipandas.paths.db_path_input()
         Ruta_Partes = list(ruta_db.parts)
         Ruta_Partes[-1] = 'collection.media'
         Ruta_Partes.append(media)
         return pathlib.Path(*Ruta_Partes)
+
+ 
+    def Obtener_ruta_base(self):
+        ruta_db = ankipandas.paths.db_path_input()
+        Ruta_Partes = list(ruta_db.parts)
+        Ruta_Partes[-1] = 'collection.media'
+        Ruta_Partes.append("")
+        return str(pathlib.Path(*Ruta_Partes))+"/"
 
     
 

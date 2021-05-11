@@ -1,48 +1,103 @@
 from ankiwrapper import AnkiWrapper
-import imageStego
+import os
+import pathlib
+import stegoImage
 import re
+import utils
 
 
-def decodificar(RutaImagen, Contrasenya):
-    data = imageStego.decode(RutaImagen, Contrasenya)
-    print("Data: ", data)
+def decodificar2(RutaImagen, Contrasenya):
+    data = stegoImage.decode(RutaImagen, Contrasenya)
+    print("Resultado: ", utils.hexToString(data))
     print("Imagen decodificada")
+def Codificar2(RutaImagen, Mensaje, Contrasenya, NuevaRutaImagen):
+    return  stegoImage.encode(RutaImagen, Mensaje, Contrasenya, NuevaRutaImagen) 
 
-def Codificar(RutaImagen, Mensaje, Contrasenya):
-    maxSize = imageStego.estimate(RutaImagen)
-    imageStego.encode(RutaImagen, Mensaje, Contrasenya, RutaImagen)
-    print("Imagen codificada")
+def decodificar(nombreImagen, contrasenya):
+    aw = AnkiWrapper.getInstance()
+    return stegoImage.decode(aw.ruta_base+nombreImagen, contrasenya)
 
-def Busqueda_multimedia(mazo, tipo):
-    resultado = []
-    if tipo == "img":
-        patron = '<img src="([^"]+)">'
-    elif tipo == "mp3":
-        patron = '[sound:([^"]+)]'
-    elif tipo =="todo":
-        patron = '([^\[^\<]+)*(<img src=\"([^\"]+)\">)*(\[sound:([^\]]+)\])*'
-    
-    for i in mazo.flds:
-        r = re.findall(patron,i)
-        if r : resultado.extend(r)
-    return resultado
 
+def codificar(index, nombreImagen, mensaje, contrasenya, mensajeOriginal):
+    aw = AnkiWrapper.getInstance()
+    rutaBase = aw.ruta_base
+    nuevoNombreImagen = modificarNombre(nombreImagen)
+
+    stegoImage.encode(rutaBase+nombreImagen, mensaje, contrasenya, rutaBase+nuevoNombreImagen) 
+    return aw.Update_row_notes(index, mensajeOriginal.replace(nombreImagen, nuevoNombreImagen))
+
+def modificarNombre(nombreImagen):
+    index = nombreImagen.rfind(".")
+    return nombreImagen[:index] + "_.png"
+
+
+def Prueba1():
+    rutaBase = "/Users/gonzalo/Library/Application Support/Anki2/Esteganografia/collection.media/"
+
+    Codificar(rutaBase+"Jose-madrid.png", utils.stringToHex("hola"), "contra", rutaBase+"Jose-madrid_MOD.png") 
+    print(decodificar(rutaBase+"Jose-madrid_MOD.png", "contra"))
+
+
+def analizarCard(card):
+    aw = AnkiWrapper.getInstance()
+    print(card.flds)
+    Objetos_carta = utils.processCardText(card.flds)
+    respuesta = []
+    for i in Objetos_carta['images']:
+        respuesta.append({i: stegoImage.estimate(aw.ruta_base + i)})
+    return respuesta
 
 def main():
     aw = AnkiWrapper()
     mazo = aw.get_Notes_from_Deck("Gonzalo")
-    array_resultado = Busqueda_multimedia(mazo, 'img')
-    print(array_resultado)
-    rutaImagen = aw.Obtener_ruta_media(array_resultado[3])
-    print(rutaImagen)
+    card = mazo.loc[482]
+    analisis = analizarCard(card)
+    #Decidir con analisis
+    nombre = list(analisis[0].keys())[0] #Nombre
+    valor = analisis[0][list(analisis[0].keys())[0]] #Valor
+    print(nombre)
+    print(valor)
+    for i in analisis:
+        print(list(i.keys())[0]) #NOMBRE
+        print(i[list(i.keys())[0]]) #VALOR
 
-    Mensaje = "hola este es un mensaje"
-    Contrasenya = "halamadrid13"
+    codificar(card.name, nombre, utils.stringToHex("HolaXD"), "password", card.flds)
+    decodificar(nombre, "password")
+    print(mazo)
 
-    Codificar(rutaImagen, Mensaje, Contrasenya)
-    decodificar(rutaImagen, Contrasenya)
-    
 
+def Prueba_Decodificar():
+    aw = AnkiWrapper.getInstance()
+    mazo = aw.get_Notes_from_Deck("Gonzalo")
+    print(mazo)
+    row = mazo.iloc[1]
+    print(row)
+    Nuevo_mensaje = row[6]
+
+    Objetos_carta = utils.processCardText(row[6])
+
+    RutaImagen = aw.Obtener_ruta_media(Objetos_carta['images'][0])
+    NuevaRutaImagen = Modificar_Nombre(RutaImagen)
+
+    print(RutaImagen)
+    print(decodificar(RutaImagen, "Contrasenya"))
+
+
+
+def PruebaCodificar():
+    aw = AnkiWrapper()
+    mazo = aw.get_Notes_from_Deck("Gonzalo")
+    row = mazo.iloc[1]
+    Nuevo_mensaje = row[6]
+
+    Objetos_carta = utils.processCardText(row[6])
+
+    RutaImagen = aw.Obtener_ruta_media(Objetos_carta['images'][0])
+    NuevaRutaImagen = Modificar_Nombre(RutaImagen)
+
+    print(Codificar(RutaImagen, utils.stringToHex("Esto es un mensaje:)"), "Contrasenya", str(NuevaRutaImagen)))
+    aw.Update_row_notes(row.name, Nuevo_mensaje.replace(Objetos_carta['images'][0],NuevaRutaImagen.name))
+    #print(aw.get_Notes_from_Deck("Gonzalo"))
 
 
 if __name__ == "__main__":

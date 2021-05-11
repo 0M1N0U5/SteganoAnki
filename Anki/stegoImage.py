@@ -3,6 +3,8 @@ from PIL import Image
 import statistics
 import random
 import traceback
+import threading
+import numpy as np
 
 MAX_WIDTH = 3840
 MAX_HEIGHT = 2160
@@ -153,4 +155,44 @@ def decode(imagePath, password):
             traceback.print_exc()
             return False
 
+def drawMask(imagePath, outputFileName, threads=1):
+    outputFileNameObj = utils.manageOutputFileName(outputFileName)
+    outputFileName = outputFileNameObj["name"]
+    try:
+        with Image.open(imagePath) as img:
+            def drawMaskWorker(positions, imgArray):
+                for position in positions:
+                    x = position["x"]
+                    y = position["y"]
+                    pixel = list(imgArray[y, x])
+                    if utils.isValidPixel(pixel):
+                        pixel = [0, 255, 0]
+                        imgArray[y, x] = pixel
 
+            imgArray = np.asarray(img).copy()
+            width, height = img.size
+            if width > MAX_WIDTH or height > MAX_HEIGHT:
+                print(imagePath, "is", width, "x", height)
+                print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
+                return False
+            else:
+                positions = utils.randomPositions(width, height)
+                threadsPositions = utils.chunkIt(positions, threads)
+                threadsArray = []
+                for l in threadsPositions:
+                    t = threading.Thread(target=drawMaskWorker, args=(l,imgArray,))
+                    threadsArray.append(t)
+                    t.start()
+                for t in threadsArray:
+                    t.join()
+                
+                newImg = Image.fromarray(imgArray)
+                newImg.save(outputFileName, outputFileNameObj["type"])
+                return True
+    except Exception as e:
+            print(f'\n[-]Exception occured: {e}')
+            print(e)
+            traceback.print_exc()
+            return False
+    finally:
+            return True

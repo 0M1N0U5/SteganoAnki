@@ -148,6 +148,17 @@ def randomSplit(toSplit, size):
 
     return splited
 
+def chunkIt(seq, num):
+    avg = len(seq) / float(num)
+    out = []
+    last = 0.0
+
+    while last < len(seq):
+        out.append(seq[int(last):int(last + avg)])
+        last += avg
+
+    return out
+
 def getVectorValue(vector):
     return sum([x % 10 for x in vector])
 
@@ -256,24 +267,28 @@ def inverseRandomArray(array,password):
     originalVector = collections.OrderedDict(sorted(originalVector.items()))
     return list(originalVector.values())
 
-def randomPositions(width, height, password):
+def randomPositions(width, height, password=None):
     pos = { "x": 0, "y": 0}
     positions = []
-
-    for x in range(0, width):
-        for y in range(0, height):
+    for x in range(0, height):
+        for y in range(0, width):
+    #for x in range(0, width):
+    #    for y in range(0, height):
             pos["x"] = x
             pos["y"] = y
             positions.append(pos.copy())
 
-    return randomArray(positions, password)
+    if password is None:
+        return positions
+    else:
+        return randomArray(positions, password)
     
 
 def getSTDev(vector):
     global COLOR_SIZE
     tmpVector = []
     for i in range(COLOR_SIZE):
-        tmpVector.append(vector[i])
+        tmpVector.append(int(vector[i]))
     return statistics.stdev(tmpVector)
 
 def getMean(vector):
@@ -285,7 +300,7 @@ def getMean(vector):
 
 def isValidPixel(pixel):
     mean = getMean(pixel)
-    return getSTDev(pixel) > 10 or mean < 100 and mean > 20
+    return getSTDev(pixel) > 10 or (mean < 100 and mean > 20)
 
 def calculatePreHeader(password):
     preHeader = sha256Iterations(password, 5000)

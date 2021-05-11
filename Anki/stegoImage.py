@@ -88,8 +88,11 @@ def estimate(imagePath):
     if total > 0:
         total -= (HEADER_SIZE * 2)
         total -= (PRE_HEADER_SIZE * 2)
-    return total
 
+    if total < 0:
+        return 0
+    else:
+        return total
 
 def decode(imagePath, password):
     global HEADER_SIZE

@@ -1,3 +1,4 @@
+from numpy import can_cast
 from ankiwrapper import AnkiWrapper
 import os
 import pathlib
@@ -41,6 +42,7 @@ def inicio(mensaje, password, nombreMazo):
 
 def main():
     nombreMazo = "Gonzalo"
+    mensaje = utils.stringToHex("Hola, este es un mensaje:)")
     aw = AnkiWrapper()
     mazo = aw.getNotesFromDeck(nombreMazo)
     print(mazo)
@@ -49,10 +51,12 @@ def main():
     resultado = buscarImagenesMazo(mazo)
     print(resultado)
     print(len(resultado))
+    sizeMensaje = len(mensaje)
     for i in resultado:
         for x in i:
             for key in x:
                 print(key)
+    #Mirar 
     
 def buscarImagenesMazo(mazo):
     lista = []
@@ -61,11 +65,6 @@ def buscarImagenesMazo(mazo):
         if len(resultadoAnalisis) != 0:
             lista.append(resultadoAnalisis)
     return lista
-
-
-def calcularTamanyoMensaje(mensaje):
-    size = utils.stringToHex(mensaje)
-    return len(size)
 
 
 ######

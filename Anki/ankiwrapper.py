@@ -67,7 +67,16 @@ class AnkiWrapper:
         self.notesRaw.at[index, "csum"] = UtilesAnki.calcularCsum(nuevaRespuestaLista[0])
         return self.updateNotes()
 
- 
+    def updateRowsNotes(self, lista):
+        for i in lista:
+            antiguoFlds = self.notesRaw.loc[i['index']].flds
+            nuevaRespuestaCadena = antiguoFlds.replace(i['name'], i['newName'])
+            nuevaRespuestaLista = UtilesAnki.decodificarFlds(nuevaRespuestaCadena)
+            self.notesRaw.at[i['index'],"flds"] = nuevaRespuestaCadena
+            self.notesRaw.at[i['index'], "sfld"] = nuevaRespuestaLista[0]
+            self.notesRaw.at[i['index'], "csum"] = UtilesAnki.calcularCsum(nuevaRespuestaLista[0])
+        return self.updateNotes()
+
     def obtenerRutaBase(self):
         rutaDB = ankipandas.paths.db_path_input()
         rutaPartes = list(rutaDB.parts)

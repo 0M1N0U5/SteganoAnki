@@ -232,7 +232,14 @@ def getBestVector(initVector, targetValue):
                 min_pos = i
 
         action = 1
+        printe = False
+        prints = 0
+        #if not isValidPixel(finalVector):
+        #    print("Sigue sin ser valido")
+        #    printe = True
+        fails = 0
         while not isValidPixel(finalVector):
+            fails += 1
             lastaction = action
             if action == 1:
                 if finalVector[max_pos] + 10 < 256:
@@ -242,6 +249,13 @@ def getBestVector(initVector, targetValue):
                 if finalVector[min_pos] - 10 > -1:
                     finalVector[min_pos] -=10
                 action = 1
+            if fails >= 100:
+                print("Bloqueo con pixel", initVector, "->", finalVector)
+                if(fails >= 109):
+                    exit(0)
+            #if printe and prints < 10:
+            #    print(finalVector)
+            #    prints += 1
     return finalVector
 
 def randomArray(array, password):
@@ -267,11 +281,11 @@ def inverseRandomArray(array,password):
     originalVector = collections.OrderedDict(sorted(originalVector.items()))
     return list(originalVector.values())
 
-def randomPositions(width, height, password=None):
+def randomPositions(rows, columns, password=None):
     pos = { "x": 0, "y": 0}
     positions = []
-    for x in range(0, height):
-        for y in range(0, width):
+    for x in range(0, rows):
+        for y in range(0, columns):
     #for x in range(0, width):
     #    for y in range(0, height):
             pos["x"] = x
@@ -297,10 +311,17 @@ def getMean(vector):
     for i in range(COLOR_SIZE):
         total += vector[i]
     return int(total/COLOR_SIZE)
+def isValidPixel(vector):
+    global COLOR_SIZE
+    tmpVector = list(map(int, vector[0:3]))
+    std = statistics.stdev(tmpVector)
+    result = std > 14 and std < 100
+    #print("vector", vector, "tmpVector", tmpVector, result, "mean", mean, "std", std)
+    return result
 
-def isValidPixel(pixel):
-    mean = getMean(pixel)
-    return getSTDev(pixel) > 10 or (mean < 100 and mean > 20)
+def isValidPixelLight(vector):
+    tmpVector = vector[0:3]
+    return 
 
 def calculatePreHeader(password):
     preHeader = sha256Iterations(password, 5000)

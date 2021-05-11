@@ -36,16 +36,16 @@ def encode(imagePath, hexdata, password, outputFileName):
                 dataLength += (PRE_HEADER_SIZE * 2)
                 data = preHeader + header + data
                 if(dataLength < width * height):
-                    positions = utils.randomPositions(width, height, password)
+                    positions = utils.randomPositions(height, width, password)
                     for position in positions:
                         if(i < dataLength):
                             x = position["x"]
                             y = position["y"]
-                            pixel = list(img.getpixel((x, y)))
+                            pixel = list(img.getpixel((y, x)))
                             if utils.isValidPixel(pixel):
                                 newPixel = utils.getBestVector(pixel, int(data[i], 16))
                                 #print(int(data[i], 16), x, y, pixel, "->", newPixel)
-                                img.putpixel((x, y), tuple(newPixel))
+                                img.putpixel((y, x), tuple(newPixel))
                                 i += 1
                         else:
                             break
@@ -77,9 +77,9 @@ def estimate(imagePath):
                 print(imagePath, "is", width, "x", height)
                 print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
             else:
-                for x in range(0, width):
-                    for y in range(0, height):
-                        pixel = list(img.getpixel((x, y)))
+                for x in range(0, height):
+                    for y in range(0, width):
+                        pixel = list(img.getpixel((y, x)))
                         if utils.isValidPixel(pixel):
                             total += 1
     except Exception as e:
@@ -105,7 +105,7 @@ def decode(imagePath, password):
                 print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
                 return False
             else:
-                positions = utils.randomPositions(width, height, password)
+                positions = utils.randomPositions(height, width, password)
                 i = 0
                 preheader = []
                 header = []
@@ -114,7 +114,7 @@ def decode(imagePath, password):
                 for position in positions:
                     x = position["x"]
                     y = position["y"]
-                    pixel = list(img.getpixel((x, y)))
+                    pixel = list(img.getpixel((y, x)))
 
                     preHeaderStart = 0
                     preHeaderEnd = PRE_HEADER_SIZE*2
@@ -181,7 +181,7 @@ def drawMask(imagePath, outputFileName, threads=1):
                 print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
                 return False
             else:
-                positions = utils.randomPositions(width, height)
+                positions = utils.randomPositions(height, width)
                 threadsPositions = utils.chunkIt(positions, threads)
                 workers = []
                 for l in threadsPositions:

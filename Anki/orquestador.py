@@ -55,7 +55,7 @@ def main():
         print(len(resultado))
         sizeMensaje = len(mensaje)
 
-    dumpData(rutaBase, data, password, resultado)
+    dumpDataToMedia(rutaBase, data, password, resultado)
 
 def supossedMain():
     estimate = False

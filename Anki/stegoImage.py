@@ -5,6 +5,8 @@ import random
 import traceback
 import threading
 import numpy as np
+from multiprocessing import Process, Manager
+from multiprocessing.managers import BaseManager
 
 MAX_WIDTH = 3840
 MAX_HEIGHT = 2160
@@ -86,8 +88,11 @@ def estimate(imagePath):
     if total > 0:
         total -= (HEADER_SIZE * 2)
         total -= (PRE_HEADER_SIZE * 2)
-    return total
 
+    if total < 0:
+        return 0
+    else:
+        return total
 
 def decode(imagePath, password):
     global HEADER_SIZE
@@ -164,10 +169,10 @@ def drawMask(imagePath, outputFileName, threads=1):
                 for position in positions:
                     x = position["x"]
                     y = position["y"]
-                    pixel = list(imgArray[y, x])
+                    pixel = list(imgArray[y][x])
                     if utils.isValidPixel(pixel):
-                        pixel = [0, 255, 0]
-                        imgArray[y, x] = pixel
+                        pixel = list([0, 255, 0])
+                        imgArray[y][x] = pixel
 
             imgArray = np.asarray(img).copy()
             width, height = img.size
@@ -178,12 +183,12 @@ def drawMask(imagePath, outputFileName, threads=1):
             else:
                 positions = utils.randomPositions(width, height)
                 threadsPositions = utils.chunkIt(positions, threads)
-                threadsArray = []
+                workers = []
                 for l in threadsPositions:
-                    t = threading.Thread(target=drawMaskWorker, args=(l,imgArray,))
-                    threadsArray.append(t)
+                    t = threading.Thread(target=drawMaskWorker, args=(l,imgArray))
+                    workers.append(t)
                     t.start()
-                for t in threadsArray:
+                for t in workers:
                     t.join()
                 
                 newImg = Image.fromarray(imgArray)

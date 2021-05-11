@@ -1,4 +1,3 @@
-import argparse
 import argparse, os
 
 def dir_path(string):
@@ -19,14 +18,15 @@ parser.add_argument('-m', dest='mode', metavar='mode <0|1|2> ',choices=['0', '1'
 parser.add_argument('-e',dest='estimate', action='store_true',help='Add it to activate it: estimation of capacity')
 
 args = parser.parse_args()
-if args.estimate:
-    print("Estimation turned on")
 
-if args.mode=='0':
-    print("Mode Stego in image turned on")
-elif args.mode=='1':
-    print("Mode Stego in text turned on")
-elif args.mode=='2':
-    print("Mode Stego in Flags turned on")
+def main():
+    if args.estimate:
+        print("Estimation turned on")
+    if args.mode=='0':
+        print("Mode Stego in image turned on")
+    elif args.mode=='1':
+        print("Mode Stego in text turned on")
+    elif args.mode=='2':
+        print("Mode Stego in Flags turned on")
 
-
+main()

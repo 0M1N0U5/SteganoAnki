@@ -1,15 +1,15 @@
 import re
 from hashlib import sha1
 
-def Codificar_flds(Lista_Entrada):
+def codificarFlds(Lista_Entrada):
     return '\x1f'.join(Lista_Entrada)
 
-def Decodificar_flds(String_Entrada):
+def decodificarFlds(String_Entrada):
     return String_Entrada.split('\x1f')
 
 #Adaptación de:
 #https://github.com/weihautin/anki/blob/8f73d3ad55c298f38c56bc88e0bd62aa9a9828dc/anki/utils.py#L278
-def Calcular_CSUM(data):
+def calcularCSUM(data):
     reStyle = re.compile("(?s)<style.*?>.*?</style>")
     reScript = re.compile("(?s)<script.*?>.*?</script>")
     reTag = re.compile("<.*?>")

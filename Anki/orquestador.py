@@ -36,6 +36,7 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
 
 def main():
     mocking = True
+    mocking = False
     rutaBase = "/home/jose/.local/share/Anki2/Usuario 1/collection.media/"
     resultado = [[{"name": "gonzalo-madrid.jpg", "estimacion" : 91693, "index": 477}], [{"name": "Jose-madrid.jpg", "estimacion": 37653, "index": 478}]]
     data = utils.stringToHex("Esto")
@@ -45,12 +46,11 @@ def main():
         rutaBase = aw.rutaBase
         nombreMazo = "Gonzalo"
         mensaje = utils.stringToHex("Hola, este es un mensaje:)")
-        aw = AnkiWrapper()
         mazo = aw.getNotesFromDeck(nombreMazo)
         print(mazo)
         print("---")
         print("Calcular")
-        resultado = buscarImagenesMazo(mazo)
+        resultado = buscarImagenesMazo(rutaBase, mazo)
         print(resultado)
         print(len(resultado))
         sizeMensaje = len(mensaje)
@@ -59,13 +59,13 @@ def main():
 
 def supossedMain():
     estimate = False
-    media = getDeckMediaInformation(nameDeck, estimate)
+    nameDeck = "Gonzalo"
+    media = getDeckMediaInformation(nameDeck, estimate) #No esta añadirdo el deck ni 
     if estimate:
         manageEstimateMedia(media)
     else:
         password = "password"
         data = utils.stringToHex("Estos son los datos")
-        nameDeck = "Gonzalo"
         aw = AnkiWrapper.getInstance()
         rutaBase = aw.rutaBase
         updates = dumpDataToMedia(rutaBase, data, password, media)
@@ -81,7 +81,7 @@ def manageEstimateMedia(media):
 def getDeckMediaInformation(nameDeck, estimate=False):
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
-    return buscarImagenesMazo(deck, estimate)
+    return buscarImagenesMazo(aw.rutaBase, deck, estimate)
 
 def dumpDataToMedia(rutaBase, data, password, media):
     globalDataLength = len(data)
@@ -102,7 +102,7 @@ def dumpDataToMedia(rutaBase, data, password, media):
                 end = True
             if readDataLength > 0:
                 print("Escribiendo:", readData)
-                result = codificar(photo["index"], photo["name"], data, password, mensajeOriginal)
+                result = codificar(rutaBase, photo["index"], photo["name"], data, password)
                 if result:
                     pendingUpdates.append(result)
                 else:
@@ -120,10 +120,10 @@ def dumpDataToMedia(rutaBase, data, password, media):
     return pendingUpdates
 
     
-def buscarImagenesMazo(mazo, estimate=False):
+def buscarImagenesMazo(rutaBase, mazo, estimate=False):
     lista = []
     for index, row in mazo.iterrows():
-        resultadoAnalisis = analizarCard(row.name, row.flds, estimate)
+        resultadoAnalisis = analizarCard(rutaBase, row.name, row.flds, estimate)
         if len(resultadoAnalisis) != 0:
             lista.append(resultadoAnalisis)
     return lista

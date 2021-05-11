@@ -9,7 +9,7 @@ def decodificarFlds(String_Entrada):
 
 #Adaptación de:
 #https://github.com/weihautin/anki/blob/8f73d3ad55c298f38c56bc88e0bd62aa9a9828dc/anki/utils.py#L278
-def calcularCSUM(data):
+def calcularCsum(data):
     reStyle = re.compile("(?s)<style.*?>.*?</style>")
     reScript = re.compile("(?s)<script.*?>.*?</script>")
     reTag = re.compile("<.*?>")

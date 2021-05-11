@@ -57,14 +57,14 @@ class AnkiWrapper:
     
     def updateRowNotes(self, index, nuevaEntrada):
         if isinstance(nuevaEntrada, str):
-            nuevaRespuestaLista = UtilesAnki.Decodificar_flds(nuevaEntrada)
+            nuevaRespuestaLista = UtilesAnki.decodificarFlds(nuevaEntrada)
             nuevaRespuestaCadena = nuevaEntrada
         else:
-            nuevaRespuestaCadena = UtilesAnki.Codificar_flds(nuevaEntrada)
+            nuevaRespuestaCadena = UtilesAnki.codificarFlds(nuevaEntrada)
             nuevaRespuestaLista = nuevaEntrada
         self.notesRaw.at[index,"flds"] = nuevaRespuestaCadena
         self.notesRaw.at[index, "sfld"] = nuevaRespuestaLista[0]
-        self.notesRaw.at[index, "csum"] = UtilesAnki.Calcular_CSUM(nuevaRespuestaLista[0])
+        self.notesRaw.at[index, "csum"] = UtilesAnki.calcularCsum(nuevaRespuestaLista[0])
         return self.updateNotes()
 
  

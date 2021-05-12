@@ -2,7 +2,7 @@ import stegoFlags
 import utils
 
 
-def Prueba():
+def prueba():
     #Main code to run the previous functions
     secret = "paco"
     print("")
@@ -22,6 +22,20 @@ def Prueba():
     for i in range(0, len(secretHex), maxValues):
         values = secretHex[0+i:i+maxValues]
         splittedSecret = stegoFlags.encode(color, values, password)
-        print(values, "->", splittedSecret)
+        decoded = stegoFlags.decode(splittedSecret, password)
+        print(values, "->", splittedSecret, "->", decoded)
 
-Prueba()
+def pruebaDebug():
+    secret = "paco"
+    password="holamellamopaca"
+    color=1
+    secretHex = utils.stringToHex(secret)
+    maxValues =stegoFlags.estimate()
+    for i in range(0, len(secretHex), maxValues):
+        values = secretHex[0+i:i+maxValues]
+        splittedSecret = stegoFlags.encode(color, values, password)
+        print(values, "->", splittedSecret)
+        decoded = stegoFlags.decode(splittedSecret, password)
+        print(splittedSecret, "->", decoded)
+
+pruebaDebug()

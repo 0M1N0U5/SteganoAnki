@@ -279,7 +279,6 @@ def randomArray(array, password):
     return array
 
 def inverseRandomArray(array,password):
-    mixedSecret = randomArray(array.copy(), password)
     count=0
     indices=[]
     while count!=len(array):
@@ -288,7 +287,7 @@ def inverseRandomArray(array,password):
     mixedIndices = randomArray(indices.copy(), password)
     originalVector = {}
     for i in range(len(mixedIndices)):
-        originalVector[mixedIndices[i]] = mixedSecret[i]
+        originalVector[mixedIndices[i]] = array[i]
     originalVector = collections.OrderedDict(sorted(originalVector.items()))
     return list(originalVector.values())
 

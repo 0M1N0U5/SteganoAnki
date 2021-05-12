@@ -22,7 +22,6 @@ def modificarNombre(nombreImagen):
     index = nombreImagen.rfind(".")
     return nombreImagen[:index] + "_.png"
 
-
 def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora solo imagenes
     Objetos_carta = utils.processCardText(campoFlds)
     respuesta = []
@@ -35,7 +34,7 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
     return respuesta
 
 def main():
-    supossedMain()
+    decode()
     exit(0)
     mocking = True
     mocking = False
@@ -58,6 +57,22 @@ def main():
         sizeMensaje = len(mensaje)
 
     dumpDataToMedia(rutaBase, data, password, resultado)
+
+def decode():
+    estimate = False
+    nameDeck = "PORRO"
+    media = getDeckMediaInformation(nameDeck, estimate)
+
+    if estimate:
+        manageEstimateMedia(media)
+    else:
+        password = "password"
+        data = utils.stringToHex("datos")
+        aw = AnkiWrapper.getInstance()
+        rutaBase = aw.rutaBase
+        updates = retrieveData(rutaBase, data, password, media)
+        print(updates)
+    return False
 
 def supossedMain():
     estimate = False
@@ -108,6 +123,43 @@ def dumpDataToMedia(rutaBase, data, password, media):
             if readDataLength > 0:
                 print("Escribiendo:", readData)
                 result = codificar(rutaBase, photo["index"], photo["name"], data, password)
+                if result:
+                    pendingUpdates.append(result)
+                else:
+                    print("photo problem detected: ", photo["name"], "index:", photo["index"])
+                    dataReader.goBack(readDataLength)
+                    end = False
+            if end:
+                break
+        if end:
+            break
+            
+    if processedDataLength < globalDataLength:
+        return False
+
+    return pendingUpdates
+
+def retrieveData(rutaBase, data, password, media):
+    globalDataLength = len(data)
+    processedDataLength = 0
+    dataReader = DataBuffer(data)
+    end = False
+    pendingUpdates = []
+    for card in media:
+        for photo in card:
+            if photo["estimacion"] < 0:
+                print("Estimando: ", photo["name"])
+                photo["estimacion"] = stegoImage.estimate(rutaBase + photo["name"])
+            readData = dataReader.getNext(photo["estimacion"])
+            readDataLength = readData[1]
+            processedDataLength += readDataLength
+            readData = readData[0]
+            if readDataLength < photo["estimacion"]:
+                end = True
+            if readDataLength > 0:
+                #result = codificar(rutaBase, photo["index"], photo["name"], data, password)
+                result = decodificar(rutaBase, photo["name"], password)
+                print("Resultado: ",result)
                 if result:
                     pendingUpdates.append(result)
                 else:

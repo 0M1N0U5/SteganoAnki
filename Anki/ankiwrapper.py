@@ -57,26 +57,9 @@ class AnkiWrapper:
     def updateColCards(self, nombreCol, mazoActualizar):#Mirar si se actualiza si no arreglar
         self.cardsRaw[nombreCol] = mazoActualizar[nombreCol].combine_first(self.cardsRaw[nombreCol]).astype(type(self.cardsRaw[nombreCol][0]))
         return self.updateCards()
-    
-    def updateRowNotes(self, index, nuevaEntrada):#Sin usar
-        if isinstance(nuevaEntrada, str):
-            nuevaRespuestaLista = UtilesAnki.decodificarFlds(nuevaEntrada)
-            nuevaRespuestaCadena = nuevaEntrada
-        else:
-            nuevaRespuestaCadena = UtilesAnki.codificarFlds(nuevaEntrada)
-            nuevaRespuestaLista = nuevaEntrada
-        self.notesRaw.at[index,"flds"] = nuevaRespuestaCadena
-        self.notesRaw.at[index, "sfld"] = nuevaRespuestaLista[0]
-        self.notesRaw.at[index, "csum"] = UtilesAnki.calcularCsum(nuevaRespuestaLista[0])
-        return self.updateNotes()
 
     def updateRowsNotes(self, lista):
         for i in lista:
-            #Actualizar Cartas #No hace falta
-            #noteId = self.notesRaw.loc[ i['index']].id
-            #cardRow = self.cardsRaw[self.cardsRaw['nid'] == noteId]
-            #self.cardsRaw.at[cardRow.index,'usn'] = -1
-            #self.cardsRaw.at[cardRow.index, 'mod'] = int(time.time())
             #Actualizar Notas
             antiguoFlds = self.notesRaw.loc[i['index']].flds
             nuevaRespuestaCadena = "."+antiguoFlds.replace(i['name'], i['newName']) 

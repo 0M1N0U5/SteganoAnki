@@ -13,8 +13,8 @@ parser.add_argument('-s',metavar='secret', dest='secret', type=str, nargs=1, act
                     help='secret to hide',required=True)
 parser.add_argument('-p',metavar='password', dest='password', type=str, nargs=1, action='store',
                     help='password to encode/decode',required=True)
-parser.add_argument('-m', dest='mode', metavar='mode <0|1|2> ',choices=['0', '1', '2'],
-                    help='Mode chosen: stego in image=0 or stego in text=1 or stego in flags=2',required=True)
+parser.add_argument('-m', dest='mode', metavar='mode <0|1> ',choices=['0', '1'],
+                    help='Mode chosen: stego in image=0 or stego in flags=1',required=True)
 parser.add_argument('-e',dest='estimate', action='store_true',help='Add it to activate it: estimation of capacity')
 
 args = parser.parse_args()

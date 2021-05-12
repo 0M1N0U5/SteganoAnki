@@ -131,6 +131,7 @@ def readDataFromMedia(rutaBase, password, media):
                 break
         if exit: 
             break
+    return ''.join(data)
 
 def dumpDataToMedia(rutaBase, data, password, media):
     globalDataLength = len(data)

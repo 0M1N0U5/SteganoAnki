@@ -63,7 +63,6 @@ def decodeDeck(nameDeck, password):
 def encodeDeck(nameDeck, data, password, media=False):
     if not media:
         media = getDeckMediaInformation(nameDeck, False)
-    media = media["media"]
     aw = AnkiWrapper.getInstance()
     rutaBase = aw.rutaBase
     updates = dumpDataToMedia(rutaBase, data, password, media)
@@ -113,8 +112,16 @@ def readDataFromMedia(rutaBase, password, media):
     return ''.join(data)
 
 def dumpDataToMedia(rutaBase, data, password, media):
+    total = media["total"]
+    media = media["media"]
     globalDataLength = len(data)
     print("Espacio necesario: ",globalDataLength)
+    print("Espacio disponible:", total)
+    if total < globalDataLength:
+        print("Este mazo no tiene capacidad suficiente")
+        exit(0)
+    else:
+        print("Ok, escribiendo.")
     processedDataLength = 0
     dataReader = DataBuffer(data)
     end = False

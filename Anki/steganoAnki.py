@@ -1,4 +1,4 @@
-import argparse, os
+import argparse, sys
 
 def logo():
     print("")
@@ -15,50 +15,30 @@ def logo():
 """)
 
 parser = argparse.ArgumentParser(description='Anki Stegotools.')
-#parser.add_argument('-m', dest='mode', metavar='mode <enc|dec|est> ',choices=['enc', 'dec','est'],
-#                    help='Mode chosen: encode=enc or decode=dec or estimate=est',required=True)
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument('--enc', action='store_true',dest='enc',help='encode mode of operation',action='store_true')
-group.add_argument('--dec',action='store_true',dest='dec',help='decode mode of operation')
-group.add_argument('--est',action='store_true',dest='est',help='estimation mode of operation')
-parser.add_argument('-c', dest='cover', metavar='cover <0|1|2> ',choices=['0', '1','2'],
-                    help='Cover chosen: stego in image=0 or stego in flags=1 or both=2',required=True)
+subparser = parser.add_subparsers(required=True)
+encodeGroup = subparser.add_parser('enc')
+decodeGroup = subparser.add_parser('dec')
+estimateGroup = subparser.add_parser('est')
 
-subparser = parser.add_subparsers(dest='command')
+encodeGroup.add_argument('-d',metavar='deck',dest='nameDeck', type=str, action='store', help='deck of the group of cards',required=True)
+encodeGroup.add_argument('-s',metavar='source', dest='data', type=str, action='store', help='secret to hide, it can be a file route',required=True)
+encodeGroup.add_argument('-p',metavar='password', dest='password', type=str, action='store', help='password to encode',required=True)
+encodeGroup.add_argument('-m',metavar='media', dest='media', default=False, action='store', help='preestimated media. string | file path')
+encodeGroup.add_argument('-c', dest='cover', metavar='cover <0|1|2> ',choices=['0','1','2'], help='Cover chosen: stego in image=0 or stego in flags=1 or both=2',required=True)
 
-encode = subparser.add_parser('enc')
-encode.add_argument('-d',metavar='deck',dest='encDeck', type=str, action='store',
-                    help='deck of the group of cards',required=True)
-encode.add_argument('-s',metavar='secret', dest='encSecret', type=str, action='store',
-                    help='secret to hide',required=True)
-encode.add_argument('-p',metavar='password', dest='encPassword', type=str, action='store',
-                    help='password to encode/decode',required=True)
-encode.add_argument('-e',dest='encEstimate', action='store_true',help='Add it to activate it: estimation of capacity')
+decodeGroup.add_argument('-d',metavar='deck',dest='nameDeck', type=str, action='store', help='deck of the group of cards',required=True)
+decodeGroup.add_argument('-p',metavar='password', dest='password', type=str, action='store', help='password to decode',required=True)
+decodeGroup.add_argument('-c', dest='cover', metavar='cover <0|1|2> ',choices=['0','1','2'], help='Cover chosen: stego in image=0 or stego in flags=1 or both=2',required=True)
 
-decode = subparser.add_parser('dec')
-decode.add_argument('-d',metavar='deck',dest='decDeck', type=str, action='store',
-                    help='deck of the group of cards',required=True)
-decode.add_argument('-p',metavar='password', dest='decPassword', type=str, action='store',
-                    help='password to encode/decode',required=True)
+estimateGroup.add_argument('-d',metavar='deck',dest='nameDeck', type=str, action='store', help='deck of the group of cards',required=True)
+estimateGroup.add_argument('-o',metavar='output', dest='outputMedia', default=False, type=str, action='store', help='Write estimated media into file')
+estimateGroup.add_argument('-c', dest='cover', metavar='cover <0|1|2> ',choices=['0','1','2'], help='Cover chosen: stego in image=0 or stego in flags=1 or both=2',required=True)
 
-estimation = subparser.add_parser('est')
-estimation.add_argument('-d',metavar='deck',dest='estDeck', type=str, action='store',
-                    help='deck of the group of cards',required=True)
-estimation.add_argument('-o',metavar='output', dest='estOutput', type=str, action='store',
-                    help='output file to keep estimation calculation')
-
-args = parser.parse_args()
-
-def main():
-    logo()
-print(args.command)
-if args.command == '--enc':
-  print('Encode mode on. Enter commands: -d deck -s secret -p password [-e estimation]')
-elif args.command == '--dec':
-    print('Decode mode on. Enter commands: -d deck -p password')
-elif args.command == '--est':
-    print('Estimation mode on. Enter commands: -d deck [-o output]')
-
-    #Transform to object for the orquestador
-    print(vars(args))
-main()
+logo()
+if len(sys.argv) <= 1:
+    parser.print_help()
+else:
+    args = parser.parse_args()
+    vars(args)
+    print(args)
+exit(0)

@@ -1,5 +1,5 @@
 # CyberSecurity-APT-Stego
 
-![plot](./Anki/icono.png)
+![](./Anki/icono.png =250x250)
 
 Hola! esto es un readme

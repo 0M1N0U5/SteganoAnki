@@ -85,19 +85,16 @@ def supossedMain():
     print("Leyendo data del mazo", nameDeck)
     data = decodeDeck(nameDeck, password)
     print("Data recuperada:", data)
+    print("Data recuperada:",utils.hexToString(data))
 
 def decodeDeck(nameDeck, password):
     media = getDeckMediaInformation(nameDeck, False)
-    print("EncodeDeck")
-    print(media)
     aw = AnkiWrapper.getInstance()
     data = readDataFromMedia(aw.rutaBase, password, media)
-    print(data)
+    return data
 
 def encodeDeck(nameDeck, data, password, estimate):
     media = getDeckMediaInformation(nameDeck, estimate)
-    print("EncodeDeck")
-    print(media)
     if estimate:
         manageEstimateMedia(media)
     else:
@@ -127,7 +124,7 @@ def readDataFromMedia(rutaBase, password, media):
     for card in media:
         for photo in card:
             readData = stegoImage.decode(rutaBase + photo["name"], password)
-            if(len(readData)> 0):
+            if(readData and len(readData)> 0):
                 data.append(readData)
             else:
                 exit = True

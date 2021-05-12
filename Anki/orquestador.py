@@ -35,6 +35,8 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
     return respuesta
 
 def main():
+    supossedMain()
+    exit(0)
     mocking = True
     mocking = False
     rutaBase = "/home/jose/.local/share/Anki2/Usuario 1/collection.media/"
@@ -59,13 +61,13 @@ def main():
 
 def supossedMain():
     estimate = False
-    nameDeck = "Gonzalo"
-    media = getDeckMediaInformation(nameDeck, estimate) #No esta añadirdo el deck ni 
+    nameDeck = "PORRO"
+    media = getDeckMediaInformation(nameDeck, estimate) 
     if estimate:
         manageEstimateMedia(media)
     else:
         password = "password"
-        data = utils.stringToHex("Estos son los datos")
+        data = utils.stringToHex("datos")
         aw = AnkiWrapper.getInstance()
         rutaBase = aw.rutaBase
         updates = dumpDataToMedia(rutaBase, data, password, media)
@@ -81,6 +83,9 @@ def manageEstimateMedia(media):
 def getDeckMediaInformation(nameDeck, estimate=False):
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
+    print(aw.getDecks())
+    print("---")
+    print(deck)
     return buscarImagenesMazo(aw.rutaBase, deck, estimate)
 
 def dumpDataToMedia(rutaBase, data, password, media):

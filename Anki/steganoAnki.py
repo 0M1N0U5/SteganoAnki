@@ -15,7 +15,7 @@ def logo():
 
 """)
 
-parser = argparse.ArgumentParser(description='Anki Stegotools.')
+parser = argparse.ArgumentParser(description='Anki Stegano Tools.')
 subparser = parser.add_subparsers(required=True, dest="mode")
 encodeGroup = subparser.add_parser('enc')
 decodeGroup = subparser.add_parser('dec')

@@ -222,7 +222,7 @@ def call(args):
         if data and len(data) > 0:
             if output:
                 try:
-                    with open(output, 'rb') as f:
+                    with open(output, 'wb') as f:
                         f.write(bytearray.fromhex(data))
                         f.flush()
                 except Exception as e:     

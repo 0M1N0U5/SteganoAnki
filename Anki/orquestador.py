@@ -88,12 +88,16 @@ def supossedMain():
 
 def decodeDeck(nameDeck, password):
     media = getDeckMediaInformation(nameDeck, False)
+    print("EncodeDeck")
+    print(media)
     aw = AnkiWrapper.getInstance()
     data = readDataFromMedia(aw.rutaBase, password, media)
     print(data)
 
 def encodeDeck(nameDeck, data, password, estimate):
-    media = getDeckMediaInformation(nameDeck, estimate) 
+    media = getDeckMediaInformation(nameDeck, estimate)
+    print("EncodeDeck")
+    print(media)
     if estimate:
         manageEstimateMedia(media)
     else:
@@ -112,9 +116,9 @@ def manageEstimateMedia(media):
 def getDeckMediaInformation(nameDeck, estimate=False):
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
-    print(aw.getDecks())
-    print("---")
-    print(deck)
+    #print(aw.getDecks())
+    #print("---")
+    #print(deck)
     return buscarImagenesMazo(aw.rutaBase, deck, estimate)
 
 def readDataFromMedia(rutaBase, password, media):

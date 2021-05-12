@@ -28,11 +28,14 @@ def codificar(rutaBase, index, nombreImagen, mensaje, password):
 
 def buscarImagenesMazo(rutaBase, mazo, estimate=False):
     lista = []
+    total = 0
     for index, row in mazo.iterrows():
         resultadoAnalisis = analizarCard(rutaBase, row.name, row.flds, estimate)
         if len(resultadoAnalisis) != 0:
+            for p in resultadoAnalisis:
+                total += p["estimacion"]
             lista.append(resultadoAnalisis)
-    return lista
+    return lista, total
 
 def modificarNombre(nombreImagen):
     index = nombreImagen.rfind(".")
@@ -88,8 +91,9 @@ def getDeckMediaInformation(nameDeck, estimate=False):
     media = { "nameDeck": nameDeck }
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
-    imagenes = buscarImagenesMazo(aw.rutaBase, deck, estimate)
+    imagenes, total = buscarImagenesMazo(aw.rutaBase, deck, estimate)
     media["media"] = imagenes
+    media["total"] = total
     return media
 
 def readDataFromMedia(rutaBase, password, media):

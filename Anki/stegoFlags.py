@@ -7,9 +7,10 @@ def calculateRandomCombination(number):
     possibleCombinations=[]
     #This limitation is necessary so that each digit has two digits that adds it up
     size = 0
-    for i in range(9):
-        for l in range(9):
-            if i+l==number:
+    for i in range(1, 10, 1):
+        for l in range(1, 10, 1):
+            if (i+l)%16==number:
+                #print(str(i)+str(l), "->", (i+l)%16)
                 possibleCombinations.append(str(i)+str(l))
                 size += 1
     if size==1:
@@ -32,7 +33,7 @@ def encode(flag, data, password):
         solutionArray.append(x)
     result=[]
     #We modify the order according to its password in a pseudorandom way
-    result=utils.inverseRandomArray(solutionArray.copy(),password)
+    result=utils.randomArray(solutionArray.copy(),password)
     secretComputed=""
     for x in result:
         secretComputed=secretComputed+x
@@ -48,16 +49,16 @@ def encode(flag, data, password):
         secretFinal=secretComputed+str(padding)
         if utils.calculateMod8(int(secretFinal))==flag:
             done=True
-    return secretFinal
+    return int(secretFinal)
 
 #Main function to decode the flag and discover its secret
 def decode(flagHidden,password):
     #First, we check its colour
     color=utils.calculateMod8(int(flagHidden))
     #We take out the padding (two last digits out)
+    flagHidden = str(flagHidden)
     secretComputed=flagHidden[:len(flagHidden)-2]
-    if len(secretComputed) % 2 == 1:
-        secretComputed = "0" + secretComputed
+    
     #Conversion of string in a list
     listSecret=[]
     for x in secretComputed:
@@ -75,14 +76,15 @@ def decode(flagHidden,password):
             secretHex=secretHex+realSecret[cont]
         digit1=int(realSecret[cont])
         digit2=int(realSecret[cont+1])
-        operation=digit1+digit2
-        if operation>9:
-            operationHex=hex(operation)
-            operation=operationHex[2:]
-        secretHex=secretHex+str(operation)
+        operation= (digit1+digit2) % 16
+        secretHex += f'{operation:0>1x}'
         cont=cont+2
     return secretHex
 
 def estimate():
     global MAX_CAPACITY
     return MAX_CAPACITY
+
+
+#for i in range(16):
+#    calculateRandomCombination(i)    

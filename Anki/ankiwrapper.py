@@ -72,15 +72,16 @@ class AnkiWrapper:
 
     def updateRowsNotes(self, lista):
         for i in lista:
-            #Actualizar Cartas
-            noteId = self.notesRaw.loc[ i['index']].id
-            cardRow = self.cardsRaw[self.cardsRaw['nid'] == noteId]
-            self.cardsRaw.at[cardRow.index,'usn'] = -1
-            self.cardsRaw.at[cardRow.index, 'mod'] = int(time.time())
+            #Actualizar Cartas #No hace falta
+            #noteId = self.notesRaw.loc[ i['index']].id
+            #cardRow = self.cardsRaw[self.cardsRaw['nid'] == noteId]
+            #self.cardsRaw.at[cardRow.index,'usn'] = -1
+            #self.cardsRaw.at[cardRow.index, 'mod'] = int(time.time())
             #Actualizar Notas
             antiguoFlds = self.notesRaw.loc[i['index']].flds
-            nuevaRespuestaCadena = antiguoFlds.replace(i['name'], i['newName']) 
+            nuevaRespuestaCadena = "."+antiguoFlds.replace(i['name'], i['newName']) 
             nuevaRespuestaLista = UtilesAnki.decodificarFlds(nuevaRespuestaCadena)
+            self.notesRaw.at[i['index'],"usn"] = -1
             self.notesRaw.at[i['index'],"flds"] = nuevaRespuestaCadena
             self.notesRaw.at[i['index'], "sfld"] = nuevaRespuestaLista[0]
             self.notesRaw.at[i['index'], "csum"] = UtilesAnki.calcularCsum(nuevaRespuestaLista[0])

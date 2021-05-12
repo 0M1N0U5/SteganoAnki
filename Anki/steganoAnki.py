@@ -14,8 +14,8 @@ def logo():
 
 """)
 
-parser = argparse.ArgumentParser(description='Anki Stegotools.')
-subparser = parser.add_subparsers(required=True)
+parser = argparse.ArgumentParser(description='Anki Stegano Tools.')
+subparser = parser.add_subparsers(required=True, dest="mode")
 encodeGroup = subparser.add_parser('enc')
 decodeGroup = subparser.add_parser('dec')
 estimateGroup = subparser.add_parser('est')
@@ -39,6 +39,7 @@ if len(sys.argv) <= 1:
     parser.print_help()
 else:
     args = parser.parse_args()
-    vars(args)
     print(args)
+    #import orquestador
+    #orquestador.call(vars(args))
 exit(0)

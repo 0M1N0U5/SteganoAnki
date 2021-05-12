@@ -1,4 +1,5 @@
 from numpy import *
+import random
 import utils
 
 MAX_CAPACITY = 1 #hex values

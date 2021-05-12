@@ -167,19 +167,24 @@ def prepareData(data):
 def call(args):
     global USE_IMAGES
     global USE_FLAGS
-    
-    opModes = ["Encode", "Decode", "Estimate"]
+
+    USE_IMAGES = False
+    USE_FLAGS = False
+
+    opModes = ["enc", "dec", "est"]
     dataKey = "data"
     passwordKey = "password"
-    opModeKey = "op"
-    imagesKey = "images"
-    flagsKey = "flags"
+    opModeKey = "mode"
+    coverKey = "cover"
     mediaKey = "media"
     nameDeckKey = "nameDeck"
     outputMediaKey = "outputMedia"
 
-    USE_IMAGES = args[imagesKey]
-    USE_FLAGS = args[flagsKey]
+    if args[coverKey] == 0 or args[coverKey] == 2:
+        USE_IMAGES = True
+
+    if args[coverKey] == 1 or args[coverKey] == 2:
+        USE_FLAGS = True
 
     if args[opModeKey] == opModes[0]:
         #Modo encode

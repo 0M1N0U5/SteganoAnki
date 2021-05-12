@@ -47,6 +47,11 @@ class AnkiWrapper:
         return notasSelecionadas
 
 
+    def devolverFlagsMazo(self, nombreMazo):
+        mazo  = self.getCardsFromDeck(nombreMazo)
+        flags = mazo['flags']
+        return flags
+
     def updateCards(self):
         return ankipandas.raw.set_table(self.col.db,self.cardsRaw,"cards","update")
 

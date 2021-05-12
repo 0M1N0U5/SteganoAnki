@@ -219,10 +219,17 @@ def call(args):
         nameDeck = args[nameDeckKey]
         output = args[outputKey]
         data = decodeDeck(nameDeck, password)
-        if output:
-            
-        else:
-            print(data)
+        if data and len(data) > 0:
+            if output:
+                try:
+                    with open(output, 'rb') as f:
+                        f.write(bytearray.fromhex(data))
+                        f.flush()
+                except Exception as e:     
+                    print("Output file could not be written ->", output)
+                    print("Check file permissions.")
+            else:
+                print(data)
     elif args[opModeKey] == opModes[2]:
         #modo estimate
         nameDeck = args[nameDeckKey]

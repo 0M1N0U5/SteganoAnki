@@ -1,2 +1,8 @@
-# How to use: pip3 install -r requirements.txt
-ankipandas>=0.3.10
+scipy==1.6.1
+pandas==1.2.2
+cryptography==2.8
+ankipandas==0.3.10
+numpy==1.19.5
+moviepy==1.0.3
+Pillow==8.2.0
+secrets==1.0.2

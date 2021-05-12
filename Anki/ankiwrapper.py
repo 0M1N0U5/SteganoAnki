@@ -27,6 +27,7 @@ class AnkiWrapper:
             self.cardsRaw = ankipandas.raw.get_table(self.col.db, "cards")
             self.notesRaw = ankipandas.raw.get_table(self.col.db, "notes")
             self.rutaBase = self.obtenerRutaBase()
+            pd.options.mode.chained_assignment = None  
     
     def __del__(self):
         self.col.db.close()

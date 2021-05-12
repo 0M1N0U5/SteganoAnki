@@ -1,7 +1,7 @@
 from numpy import *
 import utils
 
-MAX_CAPACITY = 3 #hex values
+MAX_CAPACITY = 1 #hex values
 
 def calculateRandomCombination(number):
     possibleCombinations=[]

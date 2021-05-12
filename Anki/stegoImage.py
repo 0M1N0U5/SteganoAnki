@@ -135,7 +135,6 @@ def decode(imagePath, password):
                                 preheader = ''.join(preheader)
                                 calculatedPreHeader = utils.calculatePreHeader(password)
                                 if preheader != calculatedPreHeader:
-                                    print("ERROR: All data could not be read. PREHEADER")
                                     return False
                         elif i>=headerStart and i<headerEnd:
                             #leyendo header

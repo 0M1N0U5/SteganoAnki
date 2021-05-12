@@ -31,10 +31,17 @@ def pruebaDebug():
     color=1
     secretHex = utils.stringToHex(secret)
     maxValues =stegoFlags.estimate()
-    for i in range(0, len(secretHex), maxValues):
-        values = secretHex[0+i:i+maxValues]
-        splittedSecret = stegoFlags.encode(color, values, password)
-        print(values, "->", splittedSecret)
+    #for i in range(0, len(secretHex), maxValues):
+    #    values = secretHex[0+i:i+maxValues]
+    #    splittedSecret = stegoFlags.encode(color, values, password)
+    #    print(values, "->", splittedSecret)
+    #    decoded = stegoFlags.decode(splittedSecret, password)
+    #    print(splittedSecret, "->", decoded)
+
+    multData = ["0f", "00f", "ff", "fff", "011", "110", "444", "777", "999", "aaa", "ddd"]
+    for minidata in multData:
+        splittedSecret = stegoFlags.encode(color, minidata, password)
+        print(minidata, "->", splittedSecret)
         decoded = stegoFlags.decode(splittedSecret, password)
         print(splittedSecret, "->", decoded)
 

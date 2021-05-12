@@ -7,6 +7,13 @@ import stegoImage
 import re
 import utils
 from dataManager import DataBuffer
+import json
+import os
+import binascii
+
+USE_IMAGES = False
+USE_FLAGS = False
+
 
 def decodificar(rutaBase, nombreImagen, password):
     return stegoImage.decode(rutaBase+nombreImagen, password)
@@ -18,6 +25,14 @@ def codificar(rutaBase, index, nombreImagen, mensaje, password):
         return {"index": index, "name": nombreImagen, "newName": nuevoNombreImagen}
     else:
         return False
+
+def buscarImagenesMazo(rutaBase, mazo, estimate=False):
+    lista = []
+    for index, row in mazo.iterrows():
+        resultadoAnalisis = analizarCard(rutaBase, row.name, row.flds, estimate)
+        if len(resultadoAnalisis) != 0:
+            lista.append(resultadoAnalisis)
+    return lista
 
 def modificarNombre(nombreImagen):
     index = nombreImagen.rfind(".")
@@ -34,89 +49,47 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
         respuesta.append(image)
     return respuesta
 
-def main():
-    supossedMain()
-    exit(0)
-    mocking = True
-    mocking = False
-    rutaBase = "/home/jose/.local/share/Anki2/Usuario 1/collection.media/"
-    resultado = [[{"name": "gonzalo-madrid.jpg", "estimacion" : 91693, "index": 477}], [{"name": "Jose-madrid.jpg", "estimacion": 37653, "index": 478}]]
-    data = utils.stringToHex("Esto")
-    password = "password123"
-    if not mocking:
-        aw = AnkiWrapper.getInstance()
-        rutaBase = aw.rutaBase
-        nombreMazo = "Gonzalo"
-        mensaje = utils.stringToHex("Hola, este es un mensaje:)")
-        mazo = aw.getNotesFromDeck(nombreMazo)
-        print(mazo)
-        print("---")
-        print("Calcular")
-        resultado = buscarImagenesMazo(rutaBase, mazo)
-        print(resultado)
-        print(len(resultado))
-        sizeMensaje = len(mensaje)
-
-    dumpDataToMedia(rutaBase, data, password, resultado)
-
-def decode():
-    estimate = False
-    nameDeck = "PORRO"
-    media = getDeckMediaInformation(nameDeck, estimate)
-
-    if estimate:
-        manageEstimateMedia(media)
-    else:
-        password = "password"
-        data = utils.stringToHex("datos")
-        aw = AnkiWrapper.getInstance()
-        rutaBase = aw.rutaBase
-        updates = retrieveData(rutaBase, data, password, media)
-        print(updates)
-    return False
-
-def supossedMain():
-    estimate = False
-    nameDeck = "PORRO"
-    data = utils.stringToHex("datos")
-    password = "password"
-    print("Ocultando", data, "en mazo", nameDeck)
-    encodeDeck(nameDeck, data, password, estimate)
-    print("Leyendo data del mazo", nameDeck)
-    data = decodeDeck(nameDeck, password)
-    print("Data recuperada:", data)
-    print("Data recuperada:",utils.hexToString(data))
-
 def decodeDeck(nameDeck, password):
     media = getDeckMediaInformation(nameDeck, False)
+    media = media["media"]
     aw = AnkiWrapper.getInstance()
     data = readDataFromMedia(aw.rutaBase, password, media)
     return data
 
-def encodeDeck(nameDeck, data, password, estimate):
-    media = getDeckMediaInformation(nameDeck, estimate)
-    if estimate:
-        manageEstimateMedia(media)
+def encodeDeck(nameDeck, data, password, media=False):
+    if not media:
+        media = getDeckMediaInformation(nameDeck, False)
+    media = media["media"]
+    aw = AnkiWrapper.getInstance()
+    rutaBase = aw.rutaBase
+    updates = dumpDataToMedia(rutaBase, data, password, media)
+    if updates:
+        aw.updateRowsNotes(updates)
+        return True
     else:
-        aw = AnkiWrapper.getInstance()
-        rutaBase = aw.rutaBase
-        updates = dumpDataToMedia(rutaBase, data, password, media)
-        if updates:
-            aw.updateRowsNotes(updates)
-        else:
-            print("All data could not be written")
-            print("Use estimate function to know about limits of this deck")
+        return False
 
-def manageEstimateMedia(media):
-    print(media)
+def estimateDeck(nameDeck, output=False):
+    media = getDeckMediaInformation(nameDeck, True)
+    if output:
+        print("Writing media to file", output)
+        try:
+            with open(output, 'w') as outfile:
+                json.dump(media, outfile)
+        except Exception as e:
+            print("Media file could not be written ->", output)
+            print("Check file permissions. Anyway here is you media:")
+            print(media)
+    else:
+        print(media)
 
 def getDeckMediaInformation(nameDeck, estimate=False):
+    media = { "nameDeck": nameDeck }
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
-    #print(aw.getDecks())
-    #print("---")
-    #print(deck)
-    return buscarImagenesMazo(aw.rutaBase, deck, estimate)
+    imagenes = buscarImagenesMazo(aw.rutaBase, deck, estimate)
+    media["media"] = imagenes
+    return media
 
 def readDataFromMedia(rutaBase, password, media):
     data = []
@@ -170,50 +143,81 @@ def dumpDataToMedia(rutaBase, data, password, media):
 
     return pendingUpdates
 
-def retrieveData(rutaBase, data, password, media):
-    globalDataLength = len(data)
-    processedDataLength = 0
-    dataReader = DataBuffer(data)
-    end = False
-    pendingUpdates = []
-    for card in media:
-        for photo in card:
-            if photo["estimacion"] < 0:
-                print("Estimando: ", photo["name"])
-                photo["estimacion"] = stegoImage.estimate(rutaBase + photo["name"])
-            readData = dataReader.getNext(photo["estimacion"])
-            readDataLength = readData[1]
-            processedDataLength += readDataLength
-            readData = readData[0]
-            if readDataLength < photo["estimacion"]:
-                end = True
-            if readDataLength > 0:
-                #result = codificar(rutaBase, photo["index"], photo["name"], data, password)
-                result = decodificar(rutaBase, photo["name"], password)
-                print("Resultado: ",result)
-                if result:
-                    pendingUpdates.append(result)
-                else:
-                    print("photo problem detected: ", photo["name"], "index:", photo["index"])
-                    dataReader.goBack(readDataLength)
-                    end = False
-            if end:
-                break
-        if end:
-            break
-            
-    if processedDataLength < globalDataLength:
+def prepareMedia(media):
+    try:
+        loadedMedia = False
+        if os.path.isfile(media):
+            with open(media) as json_file:
+                loadedMedia = json.load(json_file)
+        else:
+            loadedMedia = json.load(media)
+        return loadedMedia
+    except Exception as e:
         return False
 
-    return pendingUpdates
+def prepareData(data):
+    try:
+        if os.path.isfile(data):
+            with open(data, 'rb') as f:
+                content = f.read()
+            return binascii.hexlify(content).decode("utf-8")
+    except Exception as e:
+        return utils.stringtoHex(data)
 
+def call(args):
+    global USE_IMAGES
+    global USE_FLAGS
     
-def buscarImagenesMazo(rutaBase, mazo, estimate=False):
-    lista = []
-    for index, row in mazo.iterrows():
-        resultadoAnalisis = analizarCard(rutaBase, row.name, row.flds, estimate)
-        if len(resultadoAnalisis) != 0:
-            lista.append(resultadoAnalisis)
-    return lista
+    opModes = ["Encode", "Decode", "Estimate"]
+    dataKey = "data"
+    passwordKey = "password"
+    opModeKey = "op"
+    imagesKey = "images"
+    flagsKey = "flags"
+    mediaKey = "media"
+    nameDeckKey = "nameDeck"
+    outputMediaKey = "outputMedia"
+
+    USE_IMAGES = args[imagesKey]
+    USE_FLAGS = args[flagsKey]
+
+    if args[opModeKey] == opModes[0]:
+        #Modo encode
+        data = args[dataKey]
+        password = args[passwordKey]
+        nameDeck = args[nameDeckKey]
+        data = prepareData(data)
+        media = prepareMedia(args[mediaKey])
+        if encodeDeck(nameDeck, data, password, media):
+            print("Info saved correctly")
+        else:
+            print("All data could not be written")
+            print("Use estimate function to know about limits of this deck")         
+    elif args[opModeKey] == opModes[1]:
+        #Modo decode
+        password = args[passwordKey]
+        nameDeck = args[nameDeckKey]
+        data = decodeDeck(nameDeck, password)
+        print(data)
+    elif args[opModeKey] == opModes[2]:
+        #modo estimate
+        nameDeck = args[nameDeckKey]
+        outputMedia = False
+        if args[outputMediaKey]:
+            outputMedia = args[outputMediaKey]
+        estimateDeck(nameDeck, outputMedia)
+
+
+def main():
+    estimate = False
+    nameDeck = "PORRO"
+    data = utils.stringToHex("datos")
+    password = "password"
+    print("Ocultando", data, "en mazo", nameDeck)
+    encodeDeck(nameDeck, data, password, estimate)
+    print("Leyendo data del mazo", nameDeck)
+    data = decodeDeck(nameDeck, password)
+    print("Data recuperada:", data)
+    print("Data recuperada:",utils.hexToString(data))
 
 main()

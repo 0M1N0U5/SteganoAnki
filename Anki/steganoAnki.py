@@ -13,8 +13,7 @@ def logo():
                                d8888P                                                             
 
 """)
-
-parser = argparse.ArgumentParser(description='Anki Stegotools.')
+parser = argparse.ArgumentParser(description='Anki Stegano Tools.')
 subparser = parser.add_subparsers(required=True)
 encodeGroup = subparser.add_parser('enc')
 decodeGroup = subparser.add_parser('dec')

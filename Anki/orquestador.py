@@ -8,6 +8,8 @@ import re
 import utils
 from dataManager import DataBuffer
 import json
+import os
+import binascii
 
 USE_IMAGES = False
 USE_FLAGS = False
@@ -57,7 +59,7 @@ def decodeDeck(nameDeck, password):
 def encodeDeck(nameDeck, data, password, media=False):
     if not media:
         media = getDeckMediaInformation(nameDeck, False)
-        media = media["media"]
+    media = media["media"]
     aw = AnkiWrapper.getInstance()
     rutaBase = aw.rutaBase
     updates = dumpDataToMedia(rutaBase, data, password, media)
@@ -71,8 +73,13 @@ def estimateDeck(nameDeck, output=False):
     media = getDeckMediaInformation(nameDeck, True)
     if output:
         print("Writing media to file", output)
-        with open(output, 'w') as outfile:
-            json.dump(media, outfile)
+        try:
+            with open(output, 'w') as outfile:
+                json.dump(media, outfile)
+        except Exception as e:
+            print("Media file could not be written ->", output)
+            print("Check file permissions. Anyway here is you media:")
+            print(media)
     else:
         print(media)
 
@@ -137,12 +144,25 @@ def dumpDataToMedia(rutaBase, data, password, media):
     return pendingUpdates
 
 def prepareMedia(media):
-    #TODO
-    return media
+    try:
+        loadedMedia = False
+        if os.path.isfile(media):
+            with open(media) as json_file:
+                loadedMedia = json.load(json_file)
+        else:
+            loadedMedia = json.load(media)
+        return loadedMedia
+    except Exception as e:
+        return False
 
 def prepareData(data):
-    #TODO
-    return data
+    try:
+        if os.path.isfile(data):
+            with open(data, 'rb') as f:
+                content = f.read()
+            return binascii.hexlify(content).decode("utf-8")
+    except Exception as e:
+        return utils.stringtoHex(data)
 
 def call(args):
     global USE_IMAGES

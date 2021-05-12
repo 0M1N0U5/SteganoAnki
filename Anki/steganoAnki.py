@@ -1,5 +1,5 @@
 import argparse, sys
-import orquestador
+from lib import orquestador
 
 def logo():
     print("")

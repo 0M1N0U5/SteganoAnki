@@ -1,5 +1,5 @@
-import stegoImage
-import utils
+import lib.stegoImage as stegoImage
+import lib.utils as utils
 from datetime import datetime
 
 maxSize = stegoImage.estimate("gonzalo-madrid-25.png")

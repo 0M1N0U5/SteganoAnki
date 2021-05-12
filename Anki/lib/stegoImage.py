@@ -1,4 +1,4 @@
-import utils
+import lib.utils as utils
 from PIL import Image
 import statistics
 import random

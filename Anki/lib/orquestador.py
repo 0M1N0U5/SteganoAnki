@@ -1,12 +1,12 @@
 from typing import NamedTuple
 from numpy import can_cast
-from ankiwrapper import AnkiWrapper
+from lib.ankiwrapper import AnkiWrapper
 import os
 import pathlib
-import stegoImage
+import lib.stegoImage as stegoImage
 import re
-import utils
-from dataManager import DataBuffer
+import lib.utils as utils
+from lib.dataManager import DataBuffer 
 import json
 import os
 
@@ -101,6 +101,7 @@ def readDataFromMedia(rutaBase, password, media):
         for photo in card:
             readData = stegoImage.decode(rutaBase + photo["name"], password)
             if(readData and len(readData)> 0):
+                print("Leido", photo["name"])
                 data.append(readData)
             else:
                 exit = True

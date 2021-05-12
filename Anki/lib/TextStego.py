@@ -1,5 +1,5 @@
-from ankiwrapper import AnkiWrapper
-import UtilesAnki
+from lib.ankiwrapper import AnkiWrapper
+import lib.UtilesAnki as UtilesAnki
 
 aw = AnkiWrapper()
 

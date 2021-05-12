@@ -1,7 +1,7 @@
 from ankipandas import Collection
 from ankipandas import AnkiDataFrame
 import ankipandas
-import UtilesAnki
+import lib.UtilesAnki as UtilesAnki
 import pathlib
 import pandas as pd
 import sqlite3

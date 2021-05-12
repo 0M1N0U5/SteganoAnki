@@ -35,7 +35,7 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
     return respuesta
 
 def main():
-    decode()
+    supossedMain()
     exit(0)
     mocking = True
     mocking = False

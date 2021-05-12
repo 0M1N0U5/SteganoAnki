@@ -44,6 +44,7 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
     for i in Objetos_carta['images']:
         estimacion = -1
         if estimacionReal:
+            print("Estimando "+ i+"...")
             estimacion = stegoImage.estimate(rutaBase + i)
         image = {"name": i, "estimacion": estimacion, "index": index}
         respuesta.append(image)
@@ -109,6 +110,7 @@ def readDataFromMedia(rutaBase, password, media):
 
 def dumpDataToMedia(rutaBase, data, password, media):
     globalDataLength = len(data)
+    print("Espacio necesario: ",globalDataLength)
     processedDataLength = 0
     dataReader = DataBuffer(data)
     end = False
@@ -125,7 +127,7 @@ def dumpDataToMedia(rutaBase, data, password, media):
             if readDataLength < photo["estimacion"]:
                 end = True
             if readDataLength > 0:
-                print("Escribiendo:", readData)
+                print("Escribiendo:", photo['name'])
                 result = codificar(rutaBase, photo["index"], photo["name"], data, password)
                 if result:
                     pendingUpdates.append(result)
@@ -194,10 +196,6 @@ def call(args):
         nameDeck = args[nameDeckKey]
         data = prepareData(data)
         media = prepareMedia(args[mediaKey])
-        print("nameDeck:", nameDeck)
-        print("password:", password)
-        print("data:", data)
-        print("media:", media)
         if encodeDeck(nameDeck, data, password, media):
             print("Info saved correctly")
         else:
@@ -207,8 +205,6 @@ def call(args):
         #Modo decode
         password = args[passwordKey]
         nameDeck = args[nameDeckKey]
-        print("nameDeck:", nameDeck)
-        print("password:", password)
         data = decodeDeck(nameDeck, password)
         print(data)
     elif args[opModeKey] == opModes[2]:
@@ -217,8 +213,6 @@ def call(args):
         outputMedia = False
         if args[outputMediaKey]:
             outputMedia = args[outputMediaKey]
-        print("nameDeck:", nameDeck)
-        print("outputMedia:", outputMedia)
         estimateDeck(nameDeck, outputMedia)
 
 

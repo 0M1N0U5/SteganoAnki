@@ -1,4 +1,5 @@
 import argparse, sys
+#import orquestador
 
 def logo():
     print("")
@@ -15,7 +16,7 @@ def logo():
 """)
 
 parser = argparse.ArgumentParser(description='Anki Stegotools.')
-subparser = parser.add_subparsers(required=True)
+subparser = parser.add_subparsers(required=True, dest="mode")
 encodeGroup = subparser.add_parser('enc')
 decodeGroup = subparser.add_parser('dec')
 estimateGroup = subparser.add_parser('est')

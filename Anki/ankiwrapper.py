@@ -86,7 +86,6 @@ class AnkiWrapper:
 
     def forzarActualizacion(self):
         tablaCol = self.getTableCol(self.col.db)
-        print(tablaCol)
         tablaCol.at[0, 'mod'] = int(time.time()*1000)
         self.setTable(self.col.db, tablaCol, 'update')
 

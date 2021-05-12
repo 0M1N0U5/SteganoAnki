@@ -7,6 +7,11 @@ import stegoImage
 import re
 import utils
 from dataManager import DataBuffer
+import json
+
+USE_IMAGES = False
+USE_FLAGS = False
+
 
 def decodificar(rutaBase, nombreImagen, password):
     return stegoImage.decode(rutaBase+nombreImagen, password)
@@ -44,31 +49,40 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
 
 def decodeDeck(nameDeck, password):
     media = getDeckMediaInformation(nameDeck, False)
+    media = media["media"]
     aw = AnkiWrapper.getInstance()
     data = readDataFromMedia(aw.rutaBase, password, media)
     return data
 
-def encodeDeck(nameDeck, data, password, estimate):
-    media = getDeckMediaInformation(nameDeck, estimate)
-    if estimate:
-        manageEstimateMedia(media)
+def encodeDeck(nameDeck, data, password, media=False):
+    if not media:
+        media = getDeckMediaInformation(nameDeck, False)
+        media = media["media"]
+    aw = AnkiWrapper.getInstance()
+    rutaBase = aw.rutaBase
+    updates = dumpDataToMedia(rutaBase, data, password, media)
+    if updates:
+        aw.updateRowsNotes(updates)
+        return True
     else:
-        aw = AnkiWrapper.getInstance()
-        rutaBase = aw.rutaBase
-        updates = dumpDataToMedia(rutaBase, data, password, media)
-        if updates:
-            aw.updateRowsNotes(updates)
-        else:
-            print("All data could not be written")
-            print("Use estimate function to know about limits of this deck")
+        return False
 
-def manageEstimateMedia(media):
-    print(media)
+def estimateDeck(nameDeck, output=False):
+    media = getDeckMediaInformation(nameDeck, True)
+    if output:
+        print("Writing media to file", output)
+        with open(output, 'w') as outfile:
+            json.dump(media, outfile)
+    else:
+        print(media)
 
 def getDeckMediaInformation(nameDeck, estimate=False):
+    media = { "nameDeck": nameDeck }
     aw = AnkiWrapper.getInstance()
     deck = aw.getNotesFromDeck(nameDeck)
-    return buscarImagenesMazo(aw.rutaBase, deck, estimate)
+    imagenes = buscarImagenesMazo(aw.rutaBase, deck, estimate)
+    media["media"] = imagenes
+    return media
 
 def readDataFromMedia(rutaBase, password, media):
     data = []
@@ -121,6 +135,58 @@ def dumpDataToMedia(rutaBase, data, password, media):
         return False
 
     return pendingUpdates
+
+def prepareMedia(media):
+    #TODO
+    return media
+
+def prepareData(data):
+    #TODO
+    return data
+
+def call(args):
+    global USE_IMAGES
+    global USE_FLAGS
+    
+    opModes = ["Encode", "Decode", "Estimate"]
+    dataKey = "data"
+    passwordKey = "password"
+    opModeKey = "op"
+    imagesKey = "images"
+    flagsKey = "flags"
+    mediaKey = "media"
+    nameDeckKey = "nameDeck"
+    outputMediaKey = "outputMedia"
+
+    USE_IMAGES = args[imagesKey]
+    USE_FLAGS = args[flagsKey]
+
+    if args[opModeKey] == opModes[0]:
+        #Modo encode
+        data = args[dataKey]
+        password = args[passwordKey]
+        nameDeck = args[nameDeckKey]
+        data = prepareData(data)
+        media = prepareMedia(args[mediaKey])
+        if encodeDeck(nameDeck, data, password, media):
+            print("Info saved correctly")
+        else:
+            print("All data could not be written")
+            print("Use estimate function to know about limits of this deck")         
+    elif args[opModeKey] == opModes[1]:
+        #Modo decode
+        password = args[passwordKey]
+        nameDeck = args[nameDeckKey]
+        data = decodeDeck(nameDeck, password)
+        print(data)
+    elif args[opModeKey] == opModes[2]:
+        #modo estimate
+        nameDeck = args[nameDeckKey]
+        outputMedia = False
+        if args[outputMediaKey]:
+            outputMedia = args[outputMediaKey]
+        estimateDeck(nameDeck, outputMedia)
+
 
 def main():
     estimate = False

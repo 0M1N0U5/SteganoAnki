@@ -1,5 +1,4 @@
 import argparse, sys
-#import orquestador
 
 def logo():
     print("")
@@ -40,6 +39,7 @@ if len(sys.argv) <= 1:
     parser.print_help()
 else:
     args = parser.parse_args()
-    vars(args)
     print(args)
+    #import orquestador
+    #orquestador.call(vars(args))
 exit(0)

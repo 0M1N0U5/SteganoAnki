@@ -9,7 +9,6 @@ import utils
 from dataManager import DataBuffer
 import json
 import os
-import binascii
 
 USE_IMAGES = False
 USE_FLAGS = False
@@ -135,16 +134,18 @@ def dumpDataToMedia(rutaBase, data, password, media):
             readDataLength = readData[1]
             processedDataLength += readDataLength
             readData = readData[0]
+            print("readDatalength...: ", readDataLength, len(readData))
             if readDataLength < photo["estimacion"]:
                 end = True
             if readDataLength > 0:
                 print("Escribiendo:", photo['name'])
-                result = codificar(rutaBase, photo["index"], photo["name"], data, password)
+                result = codificar(rutaBase, photo["index"], photo["name"], readData, password)
                 if result:
                     pendingUpdates.append(result)
                 else:
                     print("photo problem detected: ", photo["name"], "index:", photo["index"])
                     dataReader.goBack(readDataLength)
+                    processedDataLength -= readDataLength
                     end = False
             if end:
                 break
@@ -172,8 +173,7 @@ def prepareData(data):
     try:
         if os.path.isfile(data):
             with open(data, 'rb') as f:
-                content = f.read()
-            return binascii.hexlify(content).decode("utf-8")
+                return f.read().hex()
         else:
             return utils.stringToHex(data)
     except Exception as e:

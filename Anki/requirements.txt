@@ -1,3 +1,2 @@
 # How to use: pip3 install -r requirements.txt
-genanki>=0.10.1
 ankipandas>=0.3.10

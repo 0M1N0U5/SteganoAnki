@@ -161,8 +161,10 @@ def prepareData(data):
             with open(data, 'rb') as f:
                 content = f.read()
             return binascii.hexlify(content).decode("utf-8")
+        else:
+            return utils.stringToHex(data)
     except Exception as e:
-        return utils.stringtoHex(data)
+        return utils.stringToHex(data)
 
 def call(args):
     global USE_IMAGES
@@ -175,16 +177,15 @@ def call(args):
     dataKey = "data"
     passwordKey = "password"
     opModeKey = "mode"
-    coverKey = "cover"
     mediaKey = "media"
     nameDeckKey = "nameDeck"
     outputMediaKey = "outputMedia"
 
-    if args[coverKey] == 0 or args[coverKey] == 2:
-        USE_IMAGES = True
-
-    if args[coverKey] == 1 or args[coverKey] == 2:
-        USE_FLAGS = True
+    #coverKey = "cover"
+    #if args[coverKey] == 0 or args[coverKey] == 2:
+    #    USE_IMAGES = True
+    #if args[coverKey] == 1 or args[coverKey] == 2:
+    #    USE_FLAGS = True
 
     if args[opModeKey] == opModes[0]:
         #Modo encode
@@ -193,6 +194,10 @@ def call(args):
         nameDeck = args[nameDeckKey]
         data = prepareData(data)
         media = prepareMedia(args[mediaKey])
+        print("nameDeck:", nameDeck)
+        print("password:", password)
+        print("data:", data)
+        print("media:", media)
         if encodeDeck(nameDeck, data, password, media):
             print("Info saved correctly")
         else:
@@ -202,6 +207,8 @@ def call(args):
         #Modo decode
         password = args[passwordKey]
         nameDeck = args[nameDeckKey]
+        print("nameDeck:", nameDeck)
+        print("password:", password)
         data = decodeDeck(nameDeck, password)
         print(data)
     elif args[opModeKey] == opModes[2]:
@@ -210,10 +217,12 @@ def call(args):
         outputMedia = False
         if args[outputMediaKey]:
             outputMedia = args[outputMediaKey]
+        print("nameDeck:", nameDeck)
+        print("outputMedia:", outputMedia)
         estimateDeck(nameDeck, outputMedia)
 
 
-def main():
+def test():
     estimate = False
     nameDeck = "PORRO"
     data = utils.stringToHex("datos")
@@ -224,5 +233,3 @@ def main():
     data = decodeDeck(nameDeck, password)
     print("Data recuperada:", data)
     print("Data recuperada:",utils.hexToString(data))
-
-main()

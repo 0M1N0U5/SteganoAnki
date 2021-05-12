@@ -1,3 +1,4 @@
+from typing import NamedTuple
 from numpy import can_cast
 from ankiwrapper import AnkiWrapper
 import os
@@ -77,12 +78,25 @@ def decode():
 def supossedMain():
     estimate = False
     nameDeck = "PORRO"
+    data = utils.stringToHex("datos")
+    password = "password"
+    print("Ocultando", data, "en mazo", nameDeck)
+    encodeDeck(nameDeck, data, password, estimate)
+    print("Leyendo data del mazo", nameDeck)
+    data = decodeDeck(nameDeck, password)
+    print("Data recuperada:", data)
+
+def decodeDeck(nameDeck, password):
+    media = getDeckMediaInformation(nameDeck, False)
+    aw = AnkiWrapper.getInstance()
+    data = readDataFromMedia(aw.rutaBase, password, media)
+    print(data)
+
+def encodeDeck(nameDeck, data, password, estimate):
     media = getDeckMediaInformation(nameDeck, estimate) 
     if estimate:
         manageEstimateMedia(media)
     else:
-        password = "password"
-        data = utils.stringToHex("datos")
         aw = AnkiWrapper.getInstance()
         rutaBase = aw.rutaBase
         updates = dumpDataToMedia(rutaBase, data, password, media)
@@ -102,6 +116,21 @@ def getDeckMediaInformation(nameDeck, estimate=False):
     print("---")
     print(deck)
     return buscarImagenesMazo(aw.rutaBase, deck, estimate)
+
+def readDataFromMedia(rutaBase, password, media):
+    data = []
+    exit = False
+    for card in media:
+        for photo in card:
+            readData = stegoImage.decode(rutaBase + photo["name"], password)
+            if(len(readData)> 0):
+                data.append(readData)
+            else:
+                exit = True
+            if exit: 
+                break
+        if exit: 
+            break
 
 def dumpDataToMedia(rutaBase, data, password, media):
     globalDataLength = len(data)

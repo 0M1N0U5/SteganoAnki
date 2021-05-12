@@ -18,67 +18,53 @@ def calculateRandomCombination(number):
     else:
         cont=random.randint(0, size-1)
     #We choose a combination in random way
-    return str(possibleCombinations[cont])
+    return possibleCombinations[cont]
 
 #Main function to encode the secret in a flag
 def encode(flag, data, password):
-    solution=""
-    secretHex=data
-    for x in secretHex:
-        realNumber=int(x,16)
-        solution=solution+str(calculateRandomCombination(realNumber))
-        
+    #If there is something strange about the flag
+    if flag > 10:
+        return False
+
+    #Time to hide secret! - We generate a random valid combination
     solutionArray=[]
-    for x in solution:
-        solutionArray.append(x)
-    result=[]
+    for x in data:
+        solutionArray += utils.splitIntoChars(calculateRandomCombination(int(x,16)))
+
     #We modify the order according to its password in a pseudorandom way
-    result=utils.randomArray(solutionArray.copy(),password)
-    secretComputed=""
-    for x in result:
-        secretComputed=secretComputed+x
-    #Time to hide secret!
+    utils.randomArray(solutionArray,password)
+
     #Now we add the padding, so it is equal to the color given (the cover). It will have two digits.
-    myColor=utils.calculateMod8(int(secretComputed))
-    secretFinal=""
-    done=False
-    while done==False:
-        digit1=random.randint(0, 9)
-        digit2=random.randint(0, 9)
-        padding=str(digit1)+str(digit2)
-        secretFinal=secretComputed+str(padding)
-        if utils.calculateMod8(int(secretFinal))==flag:
-            done=True
-    return int(secretFinal)
+    paddingNumber = random.randint(10, 92)
+    secretFinal = int(''.join(solutionArray)+str(paddingNumber))
+    #We check for the correct module for anki
+    while secretFinal % 8 != flag:
+        secretFinal += 1
+
+    return secretFinal
 
 #Main function to decode the flag and discover its secret
 def decode(flagHidden,password):
-    #First, we check its colour
-    color=utils.calculateMod8(int(flagHidden))
+    #If there is something strange about the flag
+    if flagHidden < 10 or len(str(flagHidden)) % 2 != 0 :
+        return False
+
     #We take out the padding (two last digits out)
-    flagHidden = str(flagHidden)
-    secretComputed=flagHidden[:len(flagHidden)-2]
+    secretComputed=str(flagHidden//100)
     
     #Conversion of string in a list
-    listSecret=[]
-    for x in secretComputed:
-        listSecret.append(x)
+    listSecret= utils.splitIntoChars(secretComputed)
+
     #Now we do the random disorder again
     realSecretArray=utils.inverseRandomArray(listSecret,password)
-    realSecret=""
-    for x in realSecretArray:
-        realSecret=realSecret+x
-    secretHex=""
-    cont=0
+    
     #We have to add up its two digits in lineal order
-    while cont!=len(realSecret):
-        if cont==len(realSecret)-1:
-            secretHex=secretHex+realSecret[cont]
-        digit1=int(realSecret[cont])
-        digit2=int(realSecret[cont+1])
-        operation= (digit1+digit2) % 16
-        secretHex += f'{operation:0>1x}'
-        cont=cont+2
+    secretHex=""
+    for index, i in enumerate(realSecretArray):
+        if index % 2 == 1:
+           value = (int(i)+int(realSecretArray[index-1])) % 16
+           secretHex += f'{value:0>1x}'
+
     return secretHex
 
 def estimate():

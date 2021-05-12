@@ -43,6 +43,9 @@ def password_decrypt(token: bytes, password: str) -> bytes:
     key = _derive_key(password.encode(), salt, iterations)
     return Fernet(key).decrypt(token)
 
+def splitIntoChars(word):
+    return [char for char in word]
+
 def stringToBin(text):
     return ''.join(format(ord(char), '08b') for char in text)
 
@@ -54,10 +57,6 @@ def hexToString(s):
 
 def intToBin(x):
     return '{0:b}'.format(x)
-
-def calculateMod8(number):
-    remainder=number%8
-    return remainder
 
 supportedExtensionsMap = {
     "defaultExt" : "png",

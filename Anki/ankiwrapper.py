@@ -83,6 +83,19 @@ class AnkiWrapper:
         print(tablaCol)
         tablaCol.at[0, 'mod'] = int(time.time()*1000)
         self.setTable(self.col.db, tablaCol, 'update')
+
+
+    def guardarFlagsMazo(self, nombreMazo, nuevaFlags):
+        mazoSelecionado  = self.getCardsFromDeck(nombreMazo)
+        mazo = self.cardsRaw[self.cardsRaw.id.isin(mazoSelecionado.id)]
+        for i in range(0, nuevaFlags.size):
+            index = mazo.iloc[i].name
+            self.cardsRaw.at[index,'mod'] = time.time()
+            self.cardsRaw.at[index,'usn'] = -1
+            self.cardsRaw.at[index,'flags'] = nuevaFlags.iloc[i]
+        self.updateCards()
+        return self.forzarActualizacion()
+
     
 #Funciones adaptación de:
 #https://github.com/klieret/AnkiPandas/blob/aaa7583c38d9dadf2ff6c4ef13bceef50bbfc99d/ankipandas/raw.py

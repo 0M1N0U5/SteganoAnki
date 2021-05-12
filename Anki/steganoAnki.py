@@ -29,6 +29,7 @@ encodeGroup.add_argument('-m',metavar='media', dest='media', default=False, acti
 
 decodeGroup.add_argument('-d',metavar='deck',dest='nameDeck', type=str, action='store', help='deck of the group of cards',required=True)
 decodeGroup.add_argument('-p',metavar='password', dest='password', type=str, action='store', help='password to decode',required=True)
+decodeGroup.add_argument('-o',metavar='output', dest='output', default=False, type=str, action='store', help='Write decoded data into file')
 #decodeGroup.add_argument('-c', dest='cover', metavar='cover <0|1|2> ',choices=['0','1','2'], help='Cover chosen: stego in image=0 or stego in flags=1 or both=2',required=True)
 
 estimateGroup.add_argument('-d',metavar='deck',dest='nameDeck', type=str, action='store', help='deck of the group of cards',required=True)

@@ -193,6 +193,7 @@ def call(args):
     mediaKey = "media"
     nameDeckKey = "nameDeck"
     outputMediaKey = "outputMedia"
+    outputKey = "output"
 
     #coverKey = "cover"
     #if args[coverKey] == 0 or args[coverKey] == 2:
@@ -216,8 +217,12 @@ def call(args):
         #Modo decode
         password = args[passwordKey]
         nameDeck = args[nameDeckKey]
+        output = args[outputKey]
         data = decodeDeck(nameDeck, password)
-        print(data)
+        if output:
+            
+        else:
+            print(data)
     elif args[opModeKey] == opModes[2]:
         #modo estimate
         nameDeck = args[nameDeckKey]

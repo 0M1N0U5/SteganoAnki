@@ -51,4 +51,4 @@ def pruebaFotoMask(name):
 
 #pruebaFoto("oso.png")
 #pruebaFotoMask("Perro.png")
-pruebaFotoMask("oso.png")
+pruebaFotoMask("Paisaje.png")

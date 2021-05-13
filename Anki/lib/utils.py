@@ -58,6 +58,9 @@ def hexToString(s):
 def intToBin(x):
     return '{0:b}'.format(x)
 
+def binToInt(x):
+    return int(x,2)  
+
 supportedExtensionsMap = {
     "defaultExt" : "png",
     "defaultType" : "PNG",

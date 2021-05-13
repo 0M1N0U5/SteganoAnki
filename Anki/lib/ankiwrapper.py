@@ -28,6 +28,7 @@ class AnkiWrapper:
             self.notesRaw = ankipandas.raw.get_table(self.col.db, "notes")
             self.rutaBase = self.obtenerRutaBase()
             pd.options.mode.chained_assignment = None  
+            ankipandas.util.log.set_log_level('critical')
     
     def __del__(self):
         self.col.db.close()

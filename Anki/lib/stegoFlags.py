@@ -26,14 +26,9 @@ def encode(flags, data, password):
 
 def decode(flags, password):
     data = []
-    error = False
     for f in flags:
-        if f < 8:
-            error = True
-            break
-        data.append(decodeFlag(f))
-    if error:
-        return not error
+        if f >= 8:
+            data.append(decodeFlag(f))
     else:
         data = utils.inverseRandomArray(data, password)
         return ''.join(data).lower()

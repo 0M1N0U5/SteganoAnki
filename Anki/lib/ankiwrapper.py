@@ -91,14 +91,14 @@ class AnkiWrapper:
         self.setTable(self.col.db, tablaCol, 'update')
 
 
-    def guardarFlagsMazo(self, nombreMazo, nuevaFlags):
+    def guardarFlagsMazo(self, nombreMazo, nuevaFlags):#mirar
         mazoSelecionado  = self.getCardsFromDeck(nombreMazo)
         mazo = self.cardsRaw[self.cardsRaw.id.isin(mazoSelecionado.id)]
-        for i in range(0, nuevaFlags.size):
+        for i in range(0, len(nuevaFlags)):
             index = mazo.iloc[i].name
             self.cardsRaw.at[index,'mod'] = time.time()
             self.cardsRaw.at[index,'usn'] = -1
-            self.cardsRaw.at[index,'flags'] = nuevaFlags.iloc[i]
+            self.cardsRaw.at[index,'flags'] = nuevaFlags[i]
         self.updateCards()
         return self.forzarActualizacion()
 

@@ -168,10 +168,10 @@ def drawMask(imagePath, outputFileName, threads=1):
                 for position in positions:
                     x = position["x"]
                     y = position["y"]
-                    pixel = list(imgArray[y][x])
+                    pixel = list(imgArray[x][y])
                     if utils.isValidPixel(pixel):
                         pixel = list([0, 255, 0])
-                        imgArray[y][x] = pixel
+                        imgArray[x][y] = pixel
 
             imgArray = np.asarray(img).copy()
             width, height = img.size

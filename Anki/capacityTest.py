@@ -25,7 +25,13 @@ def pruebaFoto(name):
     print(datetime.now().strftime("%H:%M:%S"), "Utilizando password", password)
     print(datetime.now().strftime("%H:%M:%S"), "Escribiendo", capacity, "A's en:", completeOutputStego)
     if(stegoImage.encode(completeName, data, password, completeOutputStego)):
-        print(datetime.now().strftime("%H:%M:%S"), "Datos escritos con éxito")
+        print(datetime.now().strftime("%H:%M:%S"), "Datos escritos con éxito. Decodificando")
+        nameObj = utils.manageOutputFileName(completeOutputStego)
+        decodedData = stegoImage.decode(nameObj["name"], password)
+        if data == decodedData:
+            print(datetime.now().strftime("%H:%M:%S"), "Data decodificado correctamente")
+        else:
+            print(datetime.now().strftime("%H:%M:%S"), "El data decodificado no coincide")
     else:
         print(datetime.now().strftime("%H:%M:%S"), "Los datos no se han podido escribir")
 
@@ -34,4 +40,4 @@ def pruebaFoto(name):
     stegoImage.drawMask(completeName, completeOutputMask, hilos)
     print(datetime.now().strftime("%H:%M:%S"), "mascara terminada")
 
-pruebaFoto("gonzalo-madrid.jpg")
+pruebaFoto("Perro.jpg")

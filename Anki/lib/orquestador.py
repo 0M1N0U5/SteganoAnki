@@ -191,7 +191,15 @@ def dumpDataToDeck(rutaBase, data, password, media):
         readDataLength = readData[1]
         processedDataLength += readDataLength
         readData = readData[0]
-        newFlags = stegoFlags.encode(flags, readData, password)
+        if readDataLength < len(flags):
+            tmpFlags = flags[:readDataLength]
+            newFlags = stegoFlags.encode(tmpFlags, readData, password)
+        else:
+            newFlags = stegoFlags.encode(flags, readData, password)
+            
+        if newFlags and len(newFlags) < len(flags):
+            newFlags = newFlags + flags[readDataLength:]
+
         if newFlags:
             pendingUpdates["flagsUpdates"] = newFlags
         else:

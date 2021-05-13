@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy
 import random
 import string
+from PIL import Image
 
 def getRandomString(length):
     # choose from all lowercase letter
@@ -48,4 +49,26 @@ def pruebaFotoMask(name):
     stegoImage.drawMask(completeName, completeOutputMask, hilos)
     print(datetime.now().strftime("%H:%M:%S"), "mascara terminada")
 
-pruebaFotoMask("Paisaje.png")
+def capacityTest(name):
+    completeName = "media/" + name
+    completeOutputStego = "mediaOut/stego_" + name
+    completeOutputMask = "mediaOut/mask_" + name
+    print(datetime.now().strftime("%H:%M:%S"), "calculando capacidad...", name)
+    capacity = stegoImage.estimate(completeName)
+    print(datetime.now().strftime("%H:%M:%S"), "capacidad de", capacity)
+    maxCapacity = 0
+    with Image.open(completeName) as img:
+            width, height = img.size
+            maxCapacity = width * height
+    return {"name": name, "capacity": capacity, "maxCapacity": maxCapacity}
+
+#pruebaFoto("Perro.png")
+
+fotos = ["gonzalo-madrid.png", "oso.png", "Paisaje.png", "pajaros.png", "Perro.png", "youtube.png"]
+
+results = []
+for i in fotos:
+    results.append(capacityTest(i))
+for r in results:
+    percent = r["capacity"]/r["maxCapacity"]
+    print(r["name"], "->", r["capacity"], "/", r["maxCapacity"], "->", int(percent*100), "%")

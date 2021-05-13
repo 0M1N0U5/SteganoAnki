@@ -26,7 +26,7 @@ def codificar(rutaBase, index, nombreImagen, mensaje, password):
     else:
         return False
 
-def buscarImagenesMazo(rutaBase, mazo, estimate=False):
+def buscarImagenesMazo(rutaBase, mazo, estimate=False):    
     lista = []
     total = 0
     for index, row in mazo.iterrows():
@@ -42,15 +42,17 @@ def modificarNombre(nombreImagen):
     return nombreImagen[:index] + "_.png"
 
 def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora solo imagenes
+    global USE_IMAGES
     Objetos_carta = utils.processCardText(campoFlds)
     respuesta = []
-    for i in Objetos_carta['images']:
-        estimacion = -1
-        if estimacionReal:
-            print("Estimando "+ i+"...")
-            estimacion = stegoImage.estimate(rutaBase + i)
-        image = {"name": i, "estimacion": estimacion, "index": index}
-        respuesta.append(image)
+    if USE_IMAGES:
+        for i in Objetos_carta['images']:
+            estimacion = -1
+            if estimacionReal:
+                print("Estimando "+ i+"...")
+                estimacion = stegoImage.estimate(rutaBase + i)
+            image = {"name": i, "estimacion": estimacion, "index": index}
+            respuesta.append(image)
     return respuesta
 
 def decodeDeck(nameDeck, password):
@@ -102,9 +104,11 @@ def getDeckMediaInformation(nameDeck, estimate=False):
     return media
 
 def getDeckMetadataInformation(nameDeck, media):
-    aw = AnkiWrapper.getInstance()
-    media["flags"] = aw.getFlagsDeck(nameDeck)
-    media["total"] += len(media["flags"])
+    global USE_FLAGS
+    if USE_FLAGS:
+        aw = AnkiWrapper.getInstance()
+        media["flags"] = aw.getFlagsDeck(nameDeck)
+        media["total"] += len(media["flags"])
     return media
 
 def readDataFromDeck(rutaBase, password, media):

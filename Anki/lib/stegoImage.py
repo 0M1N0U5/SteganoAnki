@@ -18,14 +18,13 @@ COLOR_SIZE = 3
 def encode(imagePath, hexdata, password, outputFileName):
     outputFileNameObj = utils.manageOutputFileName(outputFileName)
     outputFileName = outputFileNameObj["name"]
-
     data = hexdata
     try:
         with Image.open(imagePath) as img:
             width, height = img.size
             if width > MAX_WIDTH or height > MAX_HEIGHT:
                 print(imagePath, "is", width, "x", height)
-                print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
+                print("Max supported resolution is (width x height) -> ("+str(MAX_WIDTH)+" x "+str(MAX_HEIGHT)+") 4k")
                 return False
             else:
                 i = 0
@@ -54,6 +53,7 @@ def encode(imagePath, hexdata, password, outputFileName):
                         print("Use estimate function to know about limits of this photo")
                         return False
                     img.save(outputFileName, outputFileNameObj["type"])
+                    return True
                 else: 
                     print("Data demasiado largo:", dataLength, "máximo soportado: ", width * height)
                     return False
@@ -62,8 +62,6 @@ def encode(imagePath, hexdata, password, outputFileName):
             print(e)
             traceback.print_exc()
             return False
-    finally:
-            return True
 
 def estimate(imagePath):
     global MAX_WIDTH
@@ -102,7 +100,7 @@ def decode(imagePath, password):
             width, height = img.size
             if width > MAX_WIDTH or height > MAX_HEIGHT:
                 print(imagePath, "is", width, "x", height)
-                print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
+                print("Max supported resolution is (width x height) -> ("+str(MAX_WIDTH)+" x "+str(MAX_HEIGHT)+") 4k")
                 return False
             else:
                 positions = utils.randomPositions(height, width, password)
@@ -165,19 +163,27 @@ def drawMask(imagePath, outputFileName, threads=1):
     try:
         with Image.open(imagePath) as img:
             def drawMaskWorker(positions, imgArray):
-                for position in positions:
-                    x = position["x"]
-                    y = position["y"]
-                    pixel = list(imgArray[x][y])
-                    if utils.isValidPixel(pixel):
-                        pixel = list([0, 255, 0])
-                        imgArray[x][y] = pixel
+                try:
+                    for position in positions:
+                        x = position["x"]
+                        y = position["y"]
+                        pixel = list(imgArray[x][y])
+                        if utils.isValidPixel(pixel):
+                            for i in range(3):
+                                if i % 2 == 0:
+                                    pixel[i] = 0
+                                else:
+                                    pixel[i] = 255
+                            imgArray[x][y] = pixel
+                except Exception as e:
+                    print("Error", e)
 
             imgArray = np.asarray(img).copy()
             width, height = img.size
+
             if width > MAX_WIDTH or height > MAX_HEIGHT:
                 print(imagePath, "is", width, "x", height)
-                print("Max supported resolution is (width x height) -> ("+MAX_WIDTH+" x "+MAX_HEIGHT+") 4k")
+                print("Max supported resolution is (width x height) -> ("+str(MAX_WIDTH)+" x "+str(MAX_HEIGHT)+") 4k")
                 return False
             else:
                 positions = utils.randomPositions(height, width)
@@ -198,5 +204,3 @@ def drawMask(imagePath, outputFileName, threads=1):
             print(e)
             traceback.print_exc()
             return False
-    finally:
-            return True

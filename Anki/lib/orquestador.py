@@ -4,6 +4,7 @@ from lib.ankiwrapper import AnkiWrapper
 import os
 import pathlib
 import lib.stegoImage as stegoImage
+import lib.stegoFlags as stegoFlags
 import re
 import lib.utils as utils
 from lib.dataManager import DataBuffer 
@@ -54,25 +55,31 @@ def analizarCard(rutaBase, index, campoFlds, estimacionReal=False): #Por ahora s
 
 def decodeDeck(nameDeck, password):
     media = getDeckMediaInformation(nameDeck, False)
-    media = media["media"]
+    media = getDeckMetadataInformation(nameDeck, media)
     aw = AnkiWrapper.getInstance()
-    data = readDataFromMedia(aw.rutaBase, password, media)
+    data = readDataFromDeck(aw.rutaBase, password, media)
     return data
 
 def encodeDeck(nameDeck, data, password, media=False):
     if not media:
         media = getDeckMediaInformation(nameDeck, False)
+        media = getDeckMetadataInformation(nameDeck, media)
     aw = AnkiWrapper.getInstance()
     rutaBase = aw.rutaBase
-    updates = dumpDataToMedia(rutaBase, data, password, media)
+    #pendingUpdates = { "imagesUpdates" : [], "flagsUpdates" : [] }
+    updates = dumpDataToDeck(rutaBase, data, password, media)
     if updates:
-        aw.updateRowsNotes(updates)
+        if updates["imagesUpdates"]:            
+            aw.updateRowsNotes(updates["imagesUpdates"])
+        if updates["flagsUpdates"]:
+            aw.guardarFlagsMazo(nameDeck, updates["flagsUpdates"])
         return True
     else:
         return False
 
 def estimateDeck(nameDeck, output=False):
     media = getDeckMediaInformation(nameDeck, True)
+    media = getDeckMetadataInformation(nameDeck, media)
     if output:
         print("Writing media to file", output)
         try:
@@ -94,25 +101,46 @@ def getDeckMediaInformation(nameDeck, estimate=False):
     media["total"] = total
     return media
 
-def readDataFromMedia(rutaBase, password, media):
+def getDeckMetadataInformation(nameDeck, media):
+    aw = AnkiWrapper.getInstance()
+    media["flags"] = aw.getFlagsDeck(nameDeck)
+    media["total"] += len(media["flags"])
+    return media
+
+def readDataFromDeck(rutaBase, password, media):
+    global USE_IMAGES
+    global USE_FLAGS
+    flags = media["flags"]
+    media = media["media"]
     data = []
     exit = False
     for card in media:
-        for photo in card:
-            readData = stegoImage.decode(rutaBase + photo["name"], password)
-            if(readData and len(readData)> 0):
-                print("Leido", photo["name"])
-                data.append(readData)
-            else:
-                exit = True
+        if USE_IMAGES:
+            for photo in card:
+                readData = stegoImage.decode(rutaBase + photo["name"], password)
+                if(readData and len(readData)> 0):
+                    print("Leido", photo["name"])
+                    data.append(readData)
+                else:
+                    exit = True
+                if exit: 
+                    break
             if exit: 
                 break
-        if exit: 
-            break
+    
+    if USE_FLAGS:
+        readData = stegoFlags.decode(flags, password)
+        if readData and len(readData) > 0:
+            print("Leidos flags")
+            data.append(readData)
+            
     return ''.join(data)
 
-def dumpDataToMedia(rutaBase, data, password, media):
+def dumpDataToDeck(rutaBase, data, password, media):
+    global USE_IMAGES
+    global USE_FLAGS
     total = media["total"]
+    flags = media["flags"]
     media = media["media"]
     globalDataLength = len(data)
     print("Espacio necesario: ",globalDataLength)
@@ -125,34 +153,48 @@ def dumpDataToMedia(rutaBase, data, password, media):
     processedDataLength = 0
     dataReader = DataBuffer(data)
     end = False
-    pendingUpdates = []
+    pendingUpdates = { "imagesUpdates" : [], "flagsUpdates" : [] }
     for card in media:
-        for photo in card:
-            if photo["estimacion"] < 0:
-                print("Estimando: ", photo["name"])
-                photo["estimacion"] = stegoImage.estimate(rutaBase + photo["name"])
-            readData = dataReader.getNext(photo["estimacion"])
-            readDataLength = readData[1]
-            processedDataLength += readDataLength
-            readData = readData[0]
-            print("readDatalength...: ", readDataLength, len(readData))
-            if readDataLength < photo["estimacion"]:
-                end = True
-            if readDataLength > 0:
-                print("Escribiendo:", photo['name'])
-                result = codificar(rutaBase, photo["index"], photo["name"], readData, password)
-                if result:
-                    pendingUpdates.append(result)
-                else:
-                    print("photo problem detected: ", photo["name"], "index:", photo["index"])
-                    dataReader.goBack(readDataLength)
-                    processedDataLength -= readDataLength
-                    end = False
-            if end:
-                break
+        if USE_IMAGES:
+            for photo in card:
+                if photo["estimacion"] < 0:
+                    print("Estimando: ", photo["name"])
+                    photo["estimacion"] = stegoImage.estimate(rutaBase + photo["name"])
+                readData = dataReader.getNext(photo["estimacion"])
+                readDataLength = readData[1]
+                processedDataLength += readDataLength
+                readData = readData[0]
+                print("readDatalength...: ", readDataLength, len(readData))
+                if readDataLength < photo["estimacion"]:
+                    end = True
+                if readDataLength > 0:
+                    print("Escribiendo:", photo['name'])
+                    result = codificar(rutaBase, photo["index"], photo["name"], readData, password)
+                    if result:
+                        pendingUpdates["pendingUpdates"].append(result)
+                    else:
+                        print("photo problem detected:", photo["name"], "index:", photo["index"])
+                        dataReader.goBack(readDataLength)
+                        processedDataLength -= readDataLength
+                        end = False
+                if end:
+                    break
         if end:
             break
-            
+
+    if USE_FLAGS and processedDataLength < globalDataLength:
+        readData = dataReader.getNext(len(flags))
+        readDataLength = readData[1]
+        processedDataLength += readDataLength
+        readData = readData[0]
+        newFlags = stegoFlags.encode(flags, readData, password)
+        if newFlags:
+            pendingUpdates["flagsUpdates"] = newFlags
+        else:
+            print("flag problem detected:", flags, "->", newFlags)
+            dataReader.goBack(readDataLength)
+            processedDataLength -= readDataLength
+        
     if processedDataLength < globalDataLength:
         return False
 
@@ -196,11 +238,11 @@ def call(args):
     outputMediaKey = "outputMedia"
     outputKey = "output"
 
-    #coverKey = "cover"
-    #if args[coverKey] == 0 or args[coverKey] == 2:
-    #    USE_IMAGES = True
-    #if args[coverKey] == 1 or args[coverKey] == 2:
-    #    USE_FLAGS = True
+    coverKey = "cover"
+    if args[coverKey] == 0 or args[coverKey] == 2:
+        USE_IMAGES = True
+    if args[coverKey] == 1 or args[coverKey] == 2:
+        USE_FLAGS = True
 
     if args[opModeKey] == opModes[0]:
         #Modo encode

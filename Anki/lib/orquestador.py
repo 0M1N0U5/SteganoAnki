@@ -235,6 +235,7 @@ def prepareData(data):
         return utils.stringToHex(data)
 
 def call(args):
+    print(args)
     global USE_IMAGES
     global USE_FLAGS
 
@@ -250,10 +251,16 @@ def call(args):
     outputMediaKey = "outputMedia"
     outputKey = "output"
 
+    aw = AnkiWrapper.getInstance()
+    if not aw.deckExiste(args[nameDeckKey]):
+        print("ERROR. Deck selecionado no existe.")
+        print("Decks disponibles:")
+        print(aw.getDecks())
+
     coverKey = "cover"
-    if args[coverKey] == 0 or args[coverKey] == 2:
+    if args[coverKey] == '0' or args[coverKey] == '2':
         USE_IMAGES = True
-    if args[coverKey] == 1 or args[coverKey] == 2:
+    if args[coverKey] == '1' or args[coverKey] == '2':
         USE_FLAGS = True
 
     if args[opModeKey] == opModes[0]:
@@ -293,6 +300,8 @@ def call(args):
             outputMedia = args[outputMediaKey]
         estimateDeck(nameDeck, outputMedia)
 
+a = {'mode': 'est', 'nameDeck': 'Nuevo_Gonzalo', 'outputMedia': False, 'cover': '1'}
+call(a)
 
 def test():
     estimate = False

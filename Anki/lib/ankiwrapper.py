@@ -36,6 +36,9 @@ class AnkiWrapper:
 
     def getDecks(self):
         return self.cards.list_decks()
+    
+    def deckExiste(self,nombreDeck):
+        return self.getDecks().count(nombreDeck) > 0 
 
     def getCardsFromDeck(self, nombreMazo):
         mazoSelecionado = self.cards[self.cards['cdeck'] == nombreMazo]

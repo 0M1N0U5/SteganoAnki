@@ -175,7 +175,7 @@ def dumpDataToDeck(rutaBase, data, password, media):
                     print("Escribiendo:", photo['name'])
                     result = codificar(rutaBase, photo["index"], photo["name"], readData, password)
                     if result:
-                        pendingUpdates["pendingUpdates"].append(result)
+                        pendingUpdates["imagesUpdates"].append(result)
                     else:
                         print("photo problem detected:", photo["name"], "index:", photo["index"])
                         dataReader.goBack(readDataLength)

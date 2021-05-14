@@ -19,7 +19,7 @@ def pruebaFoto(name):
     print(datetime.now().strftime("%H:%M:%S"), "calculando capacidad...")
     capacity = stegoImage.estimate(completeName)
     print(datetime.now().strftime("%H:%M:%S"), "capacidad de", capacity)
-    data = numpy.full(capacity, "A")
+    data = numpy.full(capacity, "a") # El hexadecimal tiene que estar en lower case
     data = ''.join(data)
     password = getRandomString(10)
     print(datetime.now().strftime("%H:%M:%S"), "Utilizando password", password)
@@ -34,7 +34,6 @@ def pruebaFoto(name):
             print(datetime.now().strftime("%H:%M:%S"), "El data decodificado no coincide")
     else:
         print(datetime.now().strftime("%H:%M:%S"), "Los datos no se han podido escribir")
-
     hilos=8
     print(datetime.now().strftime("%H:%M:%S"), "Dibujando mascara en:", completeOutputMask)
     stegoImage.drawMask(completeName, completeOutputMask, hilos)
@@ -49,6 +48,4 @@ def pruebaFotoMask(name):
     stegoImage.drawMask(completeName, completeOutputMask, hilos)
     print(datetime.now().strftime("%H:%M:%S"), "mascara terminada")
 
-#pruebaFoto("oso.png")
-#pruebaFotoMask("Perro.png")
 pruebaFotoMask("Paisaje.png")

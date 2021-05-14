@@ -1,1 +1,0 @@
-{"nameDeck": "Mazo_Capacidad", "media": [[{"name": "Paisaje.jpg", "estimacion": 1526803, "index": 168}], [{"name": "Perro.jpg", "estimacion": 257476, "index": 169}], [{"name": "Gato.jpg", "estimacion": 14797, "index": 170}]], "total": 1799076}

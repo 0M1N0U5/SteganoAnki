@@ -114,7 +114,8 @@ def getDeckMetadataInformation(nameDeck, media):
 def readDataFromDeck(rutaBase, password, media):
     global USE_IMAGES
     global USE_FLAGS
-    flags = media["flags"]
+    if USE_FLAGS:
+        flags = media["flags"]
     media = media["media"]
     data = []
     exit = False
@@ -144,7 +145,8 @@ def dumpDataToDeck(rutaBase, data, password, media):
     global USE_IMAGES
     global USE_FLAGS
     total = media["total"]
-    flags = media["flags"]
+    if USE_FLAGS:
+        flags = media["flags"]
     media = media["media"]
     globalDataLength = len(data)
     print("Espacio necesario: ",globalDataLength)
@@ -186,7 +188,7 @@ def dumpDataToDeck(rutaBase, data, password, media):
         if end:
             break
 
-    if USE_FLAGS and processedDataLength < globalDataLength:
+    if USE_FLAGS and processedDataLength < globalDataLength and flags:
         readData = dataReader.getNext(len(flags))
         readDataLength = readData[1]
         processedDataLength += readDataLength
@@ -235,7 +237,6 @@ def prepareData(data):
         return utils.stringToHex(data)
 
 def call(args):
-    print(args)
     global USE_IMAGES
     global USE_FLAGS
 

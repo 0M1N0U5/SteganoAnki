@@ -64,7 +64,7 @@ class AnkiWrapper:
         return ankipandas.raw.set_table(self.col.db,self.notesRaw,"notes","update")
 
 
-    def updateColCards(self, nombreCol, mazoActualizar):#Mirar si se actualiza si no arreglar
+    def updateColCards(self, nombreCol, mazoActualizar):
         self.cardsRaw[nombreCol] = mazoActualizar[nombreCol].combine_first(self.cardsRaw[nombreCol]).astype(type(self.cardsRaw[nombreCol][0]))
         return self.updateCards()
 

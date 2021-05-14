@@ -300,9 +300,6 @@ def call(args):
             outputMedia = args[outputMediaKey]
         estimateDeck(nameDeck, outputMedia)
 
-a = {'mode': 'est', 'nameDeck': 'Nuevo_Gonzalo', 'outputMedia': False, 'cover': '1'}
-call(a)
-
 def test():
     estimate = False
     nameDeck = "PORRO"

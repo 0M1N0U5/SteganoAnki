@@ -64,11 +64,13 @@ def capacityTest(name):
 
 #pruebaFoto("Perro.png")
 
-fotos = ["gonzalo-madrid.png", "oso.png", "Paisaje.png", "pajaros.png", "Perro.png", "youtube.png"]
+def statsPhotos():
+    fotos = ["gonzalo-madrid.png", "oso.png", "Paisaje.png", "pajaros.png", "Perro.png", "youtube.png"]
+    results = []
+    for i in fotos:
+        results.append(capacityTest(i))
+    for r in results:
+        percent = r["capacity"]/r["maxCapacity"]
+        print(r["name"], "->", r["capacity"], "/", r["maxCapacity"], "->", int(percent*100), "%")
 
-results = []
-for i in fotos:
-    results.append(capacityTest(i))
-for r in results:
-    percent = r["capacity"]/r["maxCapacity"]
-    print(r["name"], "->", r["capacity"], "/", r["maxCapacity"], "->", int(percent*100), "%")
+

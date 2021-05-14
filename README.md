@@ -1,6 +1,6 @@
 # CyberSecurity-APT-Stego
 <p align="center">
-  <a href="https://github.com/0M1N0U5/CyberSecurity-APT-Stego">
+  <a href="https://github.com/0M1N0U5/SteganoAnki">
     <img src="./Anki/media/SteganoAnki.png" alt="Logo" width="600" height="350">
   </a>
 </p>
@@ -41,9 +41,9 @@ This project was created in May 2021 for the subject "Persistent Threats and Inf
 <h1 style="display: inline-block" id="getting-started">Getting Started 🚀</h1>
 To get a local copy up and running follow these simple steps.
 <h2 style="display: inline-block" id="prerequisites">Prerequisites📋</h2>
-Run "requirements.txt" --> <a href="https://github.com/0M1N0U5/CyberSecurity-APT-Stego/blob/main/Anki/requirements.txt">📑</a>	
+Run "requirements.txt" --> <a href="https://github.com/0M1N0U5/SteganoAnki/blob/main/Anki/requirements.txt">📑</a>	
 <h2 style="display: inline-block" id="installation">Installation 🔧</h2>
-<p>Clone the repository: </p> <code> $ git clone https://github.com/0M1N0U5/CyberSecurity-APT-Stego </code>
+<p>Clone the repository: </p> <code> $ git clone https://github.com/0M1N0U5/SteganoAnki </code>
 <h1 style="display: inline-block" id="usage">Usage⚙️</h1>
 
 <p>This line will open SteganoAnki command line tool: </p>

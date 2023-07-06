@@ -1,4 +1,4 @@
-scipy==1.6.1
+scipy==1.10.0
 pandas==1.2.2
 cryptography==39.0.1
 ankipandas==0.3.10

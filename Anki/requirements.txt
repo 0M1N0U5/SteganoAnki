@@ -1,6 +1,6 @@
 scipy==1.6.1
 pandas==1.2.2
-cryptography==39.0.1
+cryptography==41.0.2
 ankipandas==0.3.10
 numpy==1.22.0
 moviepy==1.0.3
